@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>image-cropper</title>
+</head>
+<body>
+<canvas id="image-cropper" width="800" height="800"></canvas>
+<script type="module" src="/src/main.ts"></script>
+<script type="module">
+    import ImageCropper from "./src/main.js";
+
+    const cropper = new ImageCropper(document.getElementById('image-cropper'));
+
+
+    const image = new Image();
+    image.src = 'https://img-s.msn.cn/tenant/amp/entityid/AA1HWO7G.img';
+    cropper.setImage(image)
+</script>
+</body>
+
+</html>
