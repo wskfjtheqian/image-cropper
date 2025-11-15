@@ -1,11 +1,13 @@
 interface ImageCropperOption {
-    maskHandleRadius: number;
-    maskLineWidth: number
-    maskLineColor: string
-    maskColor: string;
-    backgroundBoxSize: number
-    backgroundBoxColor0: string
-    backgroundBoxColor1: string
+    outputWidth?: number
+    outputHeight?: number
+    maskHandleRadius?: number;
+    maskLineWidth?: number
+    maskLineColor?: string
+    maskColor?: string;
+    backgroundBoxSize?: number
+    backgroundBoxColor0?: string
+    backgroundBoxColor1?: string
 }
 
 class Point {
@@ -67,10 +69,16 @@ abstract class Layout {
     protected rect: Rect = new Rect(0, 0, 0, 0)
     protected parent: Layout | null = null
     protected cursor: string;
+    protected config: ImageCropperOption = {
+        backgroundBoxSize: 10,
+        backgroundBoxColor0: '#fff',
+        backgroundBoxColor1: '#ddd',
+    };
 
-    constructor(parent: Layout | null, cursor: string) {
+    constructor(parent: Layout | null, cursor: string, config?: ImageCropperOption) {
         this.parent = parent
         this.cursor = cursor
+        Object.assign(this.config, config)
     }
 
     public setRect(rect: Rect): void {
@@ -157,17 +165,14 @@ abstract class Layout {
 }
 
 class BackgroundLayout extends Layout {
-    protected boxSize: number = 10
-    protected boxColor0: string = '#fff'
-    protected boxColor1: string = '#ddd'
     protected mousePoint: Point = new Point(0, 0);
     protected selectRect: Rect = new Rect(0, 0, 0, 0)
     protected onStartSelect: ((rect: Rect) => void) | null = null
     protected onMoveSelect: ((rect: Rect) => void) | null = null
     protected onEndSelect: ((rect: Rect) => void) | null = null
 
-    constructor(parent: Layout | null) {
-        super(parent, 'crosshair');
+    constructor(parent: Layout | null, config?: ImageCropperOption) {
+        super(parent, 'crosshair', config);
     }
 
     public setOnStartSelect(callback: (rect: Rect) => void) {
@@ -208,11 +213,11 @@ class BackgroundLayout extends Layout {
         const width = right - left
         const height = bottom - top
 
-        for (let y = 0; y < height; y += this.boxSize) {
-            let color = (Math.floor(y / this.boxSize) % 2) ? this.boxColor0 : this.boxColor1
-            for (let x = 0; x < width; x += this.boxSize) {
-                ctx.fillStyle = color = color === this.boxColor1 ? this.boxColor0 : this.boxColor1
-                ctx.fillRect(x, y, this.boxSize, this.boxSize)
+        for (let y = 0; y < height; y += this.config.backgroundBoxSize!) {
+            let color = (Math.floor(y / this.config.backgroundBoxSize!) % 2) ? this.config.backgroundBoxColor0! : this.config.backgroundBoxColor1!
+            for (let x = 0; x < width; x += this.config.backgroundBoxSize!) {
+                ctx.fillStyle = color = color === this.config.backgroundBoxColor1 ? this.config.backgroundBoxColor0! : this.config.backgroundBoxColor1!
+                ctx.fillRect(x, y, this.config.backgroundBoxSize!, this.config.backgroundBoxSize!)
             }
         }
     }
@@ -222,23 +227,28 @@ class ImageLayout extends Layout {
     protected image?: HTMLImageElement
     protected scale: number = 1;
     protected angle: number = 0;
-    protected center: Point = new Point(0, 0);
+    // protected center: Point = new Point(0, 0);
+    protected clipRect: Rect = new Rect(0, 0, 0, 0)
     protected offset: Point = new Point(0, 0);
 
     constructor(parent: Layout | null, cursor: string = "auto") {
         super(parent, cursor);
     }
 
-    public setRect(rect: Rect) {
+    public setRect(rect: Rect): void {
         super.setRect(rect);
-        this.center = rect.center
+        this.clipRect = new Rect(rect.left, rect.top, rect.right, rect.bottom)
     }
 
-    public setCenter(point: Point): void {
-        const offset = new Point(this.center.x - point.x, this.center.y - point.y)
+    public setClipRect(rect: Rect): void {
+        const offset = new Point(
+            (this.clipRect.left + this.clipRect.width / 2) - (rect.left + rect.width / 2),
+            (this.clipRect.top + this.clipRect.height / 2) - (rect.top + rect.height / 2),
+        )
         this.moveImage(offset)
-        this.center = point
+        this.clipRect = rect
     }
+
 
     public setImage(image: HTMLImageElement): void {
         this.image = image
@@ -289,13 +299,76 @@ class ImageLayout extends Layout {
             return
         }
 
+        const center = new Point(this.clipRect.left + this.clipRect.width / 2, this.clipRect.top + this.clipRect.height / 2)
+
         ctx.save();
-        ctx.translate(this.center.x, this.center.y);
+        ctx.translate(center.x, center.y);
         ctx.scale(this.scale, this.scale);
         ctx.rotate(this.angle * Math.PI / 180)
         ctx.translate(this.offset.x, this.offset.y);
         ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
         ctx.restore();
+    }
+
+    protected getClipCanvas(): HTMLCanvasElement {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+            throw new Error('no canvas context');
+        }
+
+
+        // 设置canvas尺寸
+        canvas.width = this.clipRect.width;
+        canvas.height = this.clipRect.height;
+
+        ctx.save();
+
+        ctx.translate(this.clipRect.width / 2, this.clipRect.height / 2);
+        ctx.scale(this.scale, this.scale);
+        ctx.rotate(this.angle * Math.PI / 180);
+        ctx.translate(this.offset.x, this.offset.y);
+
+        ctx.drawImage(
+            this.image!,
+            -this.image!.width / 2,
+            -this.image!.height / 2,
+            this.image!.width,
+            this.image!.height
+        );
+
+        ctx.restore();
+        return canvas
+    }
+
+    public toBlob(type?: string, quality?: any): Promise<Blob | null> {
+        if (!this.image) {
+            return Promise.reject(new Error('image not loaded'))
+        }
+        return new Promise((resolve, reject) => {
+            try {
+                this.getClipCanvas().toBlob((blob: Blob | null): void => {
+                    resolve(blob);
+                }, type ?? "image/png", quality)
+            } catch (error) {
+                reject(error);
+            }
+        })
+
+    }
+
+    public toDataUrl(type?: string, quality?: any): Promise<string> {
+        if (!this.image) {
+            return Promise.reject(new Error('image not loaded'));
+        }
+        return new Promise((resolve, reject) => {
+            try {
+                resolve(this.getClipCanvas().toDataURL(type ?? "image/png", quality));
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 }
 
@@ -660,9 +733,8 @@ class ImageCropper extends Layout implements Root {
     private overLayout: Layout | null = null;
     protected layoutList: Layout[] = []
 
-
-    constructor(canvas: HTMLCanvasElement) {
-        super(null, "auto")
+    constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
+        super(null, "auto", config)
 
         this.canvas = canvas
         this.canvas2D = canvas.getContext('2d')!
@@ -769,10 +841,24 @@ class ImageCropper extends Layout implements Root {
         }
     }
 
-    public getCroppedImage(): Promise<HTMLImageElement> {
-        return new Promise(() => {
+    public toDataUrl(type?: string, quality?: any): Promise<string> {
+        if (!this.image) {
+            return Promise.reject('No image')
+        }
+        if (!this.mask) {
+            return Promise.reject('No mask')
+        }
+        return this.image.toDataUrl(type, quality)
+    }
 
-        })
+    public toBlob(type?: string, quality?: any): Promise<Blob | null> {
+        if (!this.image) {
+            return Promise.reject('No image')
+        }
+        if (!this.mask) {
+            return Promise.reject('No mask')
+        }
+        return this.image.toBlob(type, quality)
     }
 
     private initBackground() {
@@ -783,9 +869,15 @@ class ImageCropper extends Layout implements Root {
                 return
             }
             this.mask = new MaskLayout(this)
-            this.mask.setOnMoveLayout((offset: Point) => this.image?.moveImage(offset))
-            this.mask.setOnRotateLayout((angle: number) => this.image?.setRotate(angle))
-            this.mask.setOnEndSelect((rect: Rect) => this.image?.setCenter(new Point(rect.left + rect.width / 2, rect.top + rect.height / 2)))
+            this.mask.setOnMoveLayout((offset: Point) => {
+                this.image?.moveImage(offset)
+            })
+            this.mask.setOnRotateLayout((angle: number) => {
+                this.image?.setRotate(angle)
+            })
+            this.mask.setOnEndSelect((rect: Rect) => {
+                this.image?.setClipRect(rect)
+            })
             this.mask.setRect(this.rect)
             this.mask.setHandleRect(rect)
             this.layoutList.push(this.mask)
@@ -795,10 +887,9 @@ class ImageCropper extends Layout implements Root {
         })
         this.background.setOnEndSelect((rect: Rect) => {
             this.mask?.endSelect(rect)
-            this.image?.setCenter(new Point(rect.left + rect.width / 2, rect.top + rect.height / 2))
+            this.image?.setClipRect(rect)
         })
     }
-
 
 }
 
