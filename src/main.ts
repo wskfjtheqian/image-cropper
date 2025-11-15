@@ -52,7 +52,7 @@ class Rect {
     }
 
     get center(): Point {
-        return new Point((this.left + this.right) / 2, (this.top + this.bottom) / 2)
+        return new Point((this.right - this.left) / 2, (this.bottom - this.top) / 2)
     }
 }
 
@@ -222,24 +222,33 @@ class ImageLayout extends Layout {
     protected image?: HTMLImageElement
     protected scale: number = 1;
     protected angle: number = 0;
-    protected center: Point
+    protected center: Point = new Point(0, 0);
+    protected offset: Point = new Point(0, 0);
 
     constructor(parent: Layout | null, cursor: string = "auto") {
         super(parent, cursor);
-        this.center = parent!.getRect().center
+    }
+
+    public setRect(rect: Rect) {
+        super.setRect(rect);
+        this.center = rect.center
     }
 
     public setCenter(point: Point): void {
+        const offset = new Point(this.center.x - point.x, this.center.y - point.y)
+        this.moveImage(offset)
         this.center = point
     }
 
     public setImage(image: HTMLImageElement): void {
         this.image = image
-        this.setRect(new Rect(0, 0, image.width, image.height))
+        const scaleX = this.rect.width / image.width;
+        const scaleY = this.rect.height / image.height;
+        this.scale = Math.min(scaleX, scaleY)
     }
 
     public setRotate(angle: number): void {
-        this.angle = angle
+        this.angle -= angle
     }
 
     public start(): boolean {
@@ -255,39 +264,38 @@ class ImageLayout extends Layout {
     }
 
     public wheel(delta: Delta): boolean {
-        const val = Math.sign(delta.y)
-        if (val > 0) {
-            this.scale -= 0.05
+        const zoomSpeed = 0.1;
+        if (delta.y < 0) {
+            this.scale *= (1 + zoomSpeed);
         } else {
-            this.scale += 0.05
+            this.scale *= (1 - zoomSpeed);
         }
+        this.scale = Math.max(0.1, Math.min(5, this.scale));
         return true
     }
 
-    public onMoveImage(offset: Point): void {
-        this.rect.left = this.rect.left + offset.x
-        this.rect.top = this.rect.top + offset.y
-    }
+    public moveImage(offset: Point): void {
+        const cos = Math.cos(-this.angle * Math.PI / 180);
+        const sin = Math.sin(-this.angle * Math.PI / 180);
+        const deltaX = offset.x * cos - offset.y * sin;
+        const deltaY = offset.x * sin + offset.y * cos;
 
-    public onRotateImage(angle: number): void {
-        this.angle -= angle
+        this.offset.x += deltaX / this.scale;
+        this.offset.y += deltaY / this.scale;
     }
 
     public draw(ctx: CanvasRenderingContext2D): void {
         if (!this.image) {
             return
         }
-        ctx.save()
-        ctx.translate(this.rect.left, this.rect.top)
-        {
-            ctx.save()
-            ctx.translate(this.center.x, this.center.y)
-            ctx.rotate(this.angle * Math.PI / 180)
-            ctx.scale(this.scale, this.scale)
-            ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2, this.image.width, this.image.height)
-            ctx.restore()
-        }
-        ctx.restore()
+
+        ctx.save();
+        ctx.translate(this.center.x, this.center.y);
+        ctx.scale(this.scale, this.scale);
+        ctx.rotate(this.angle * Math.PI / 180)
+        ctx.translate(this.offset.x, this.offset.y);
+        ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
+        ctx.restore();
     }
 }
 
@@ -586,9 +594,14 @@ class MaskLayout extends Layout {
         }
         if (this.isChecked) {
             const center = this.handle.getRect().center
-            const k1 = (center.x - this.mousePoint.x) / (center.y - this.mousePoint.y)
-            const k2 = (center.x - point.x) / (center.y - point.y)
-            const angle = ((k2 - k1) / (1 + k1 * k2) * 90)
+
+            const dx1 = point.x - center.x;
+            const dy1 = point.y - center.y;
+            const dx2 = this.mousePoint.x - center.x;
+            const dy2 = this.mousePoint.y - center.y;
+
+            const angle = (Math.atan2(dy2, dx2) - Math.atan2(dy1, dx1)) * (180 / Math.PI);
+
             this.onRotateLayout?.call(this, angle)
             this.mousePoint = point
             return true
@@ -740,6 +753,7 @@ class ImageCropper extends Layout implements Root {
 
     public setImage(image: HTMLImageElement): void {
         this.image = new ImageLayout(this)
+        this.image.setRect(new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom))
         this.image.setImage(image)
         this.layoutList.push(this.image)
 
@@ -768,9 +782,9 @@ class ImageCropper extends Layout implements Root {
                 return
             }
             this.mask = new MaskLayout(this)
-            this.mask.setOnMoveLayout((offset: Point) => this.image?.onMoveImage(offset))
-            this.mask.setOnRotateLayout((angle: number) => this.image?.onRotateImage(angle))
-            this.mask.setOnEndSelect((rect: Rect) => this.image?.setCenter(rect.center))
+            this.mask.setOnMoveLayout((offset: Point) => this.image?.moveImage(offset))
+            this.mask.setOnRotateLayout((angle: number) => this.image?.setRotate(angle))
+            this.mask.setOnEndSelect((rect: Rect) => this.image?.setCenter(new Point(rect.left + rect.width / 2, rect.top + rect.height / 2)))
             this.mask.setRect(this.rect)
             this.mask.setHandleRect(rect)
             this.layoutList.push(this.mask)
@@ -780,7 +794,7 @@ class ImageCropper extends Layout implements Root {
         })
         this.background.setOnEndSelect((rect: Rect) => {
             this.mask?.endSelect(rect)
-            this.image?.setCenter(rect.center)
+            this.image?.setCenter(new Point(rect.left + rect.width / 2, rect.top + rect.height / 2))
         })
     }
 
