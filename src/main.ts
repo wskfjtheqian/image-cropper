@@ -56,6 +56,11 @@ class Rect {
     get center(): Point {
         return new Point((this.right - this.left) / 2, (this.bottom - this.top) / 2)
     }
+
+    public clone(): Rect {
+        return new Rect(this.left, this.top, this.right, this.bottom)
+    }
+
 }
 
 interface Root {
@@ -241,10 +246,12 @@ class ImageLayout extends Layout {
     }
 
     public setClipRect(rect: Rect): void {
+        console.log(rect)
         const offset = new Point(
             (this.clipRect.left + this.clipRect.width / 2) - (rect.left + rect.width / 2),
             (this.clipRect.top + this.clipRect.height / 2) - (rect.top + rect.height / 2),
         )
+        console.log(offset)
         this.moveImage(offset)
         this.clipRect = rect
     }
@@ -525,8 +532,7 @@ class HandleLayout extends Layout {
     }
 
     public drawMask(ctx: CanvasRenderingContext2D): void {
-        const {left, top, right, bottom} = this.rect
-        ctx.rect(left, top, right - left, bottom - top)
+        ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
     }
 
     private drawLine(ctx: CanvasRenderingContext2D, start: Point, end: Point): void {
@@ -826,7 +832,7 @@ class ImageCropper extends Layout implements Root {
 
     public setImage(image: HTMLImageElement): void {
         this.image = new ImageLayout(this)
-        this.image.setRect(new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom))
+        this.image.setRect(this.rect.clone())
         this.image.setImage(image)
         this.layoutList.push(this.image)
 
@@ -876,18 +882,18 @@ class ImageCropper extends Layout implements Root {
                 this.image?.setRotate(angle)
             })
             this.mask.setOnEndSelect((rect: Rect) => {
-                this.image?.setClipRect(rect)
+                this.image?.setClipRect(rect.clone())
             })
             this.mask.setRect(this.rect)
-            this.mask.setHandleRect(rect)
+            this.mask.setHandleRect(rect.clone())
             this.layoutList.push(this.mask)
         })
         this.background.setOnMoveSelect((rect: Rect) => {
-            this.mask?.setHandleRect(rect)
+            this.mask?.setHandleRect(rect.clone())
         })
         this.background.setOnEndSelect((rect: Rect) => {
-            this.mask?.endSelect(rect)
-            this.image?.setClipRect(rect)
+            this.mask?.endSelect(rect.clone())
+            this.image?.setClipRect(rect.clone())
         })
     }
 
