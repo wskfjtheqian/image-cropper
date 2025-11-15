@@ -584,6 +584,9 @@ class ImageCropper extends Layout {
         this.background = new BackgroundLayout(this);
         this.overLayout = null;
         this.layoutList = [];
+        const { width, height } = canvas.getBoundingClientRect();
+        canvas.width = width;
+        canvas.height = height;
         this.canvas = canvas;
         this.canvas2D = canvas.getContext('2d');
         this.setRect(new Rect(0, 0, this.canvas.width, this.canvas.height));

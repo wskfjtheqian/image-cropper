@@ -741,6 +741,9 @@ class ImageCropper extends Layout implements Root {
 
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
         super(null, "auto", config)
+        const {width, height} = canvas.getBoundingClientRect();
+        canvas.width = width;
+        canvas.height = height;
 
         this.canvas = canvas
         this.canvas2D = canvas.getContext('2d')!
@@ -897,7 +900,6 @@ class ImageCropper extends Layout implements Root {
         })
     }
 
-    
 
 }
 

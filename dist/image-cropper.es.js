@@ -9,8 +9,8 @@ class f {
   }
 }
 class a {
-  constructor(t, e, s, o) {
-    this.left = t, this.top = e, this.right = s, this.bottom = o;
+  constructor(t, e, s, h) {
+    this.left = t, this.top = e, this.right = s, this.bottom = h;
   }
   get width() {
     return this.right - this.left;
@@ -111,7 +111,7 @@ class R extends d {
     return this.onEndSelect?.call(this, this.selectRect), !0;
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect, n = o - e, r = h - s;
+    const { left: e, top: s, right: h, bottom: o } = this.rect, n = h - e, r = o - s;
     for (let l = 0; l < r; l += this.config.backgroundBoxSize) {
       let m = Math.floor(l / this.config.backgroundBoxSize) % 2 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1;
       for (let g = 0; g < n; g += this.config.backgroundBoxSize)
@@ -155,8 +155,8 @@ class w extends d {
     return t.y < 0 ? this.scale *= 1 + 0.1 : this.scale *= 1 - 0.1, this.scale = Math.max(0.1, Math.min(5, this.scale)), !0;
   }
   moveImage(t) {
-    const e = Math.cos(-this.angle * Math.PI / 180), s = Math.sin(-this.angle * Math.PI / 180), o = t.x * e - t.y * s, h = t.x * s + t.y * e;
-    this.offset.x += o / this.scale, this.offset.y += h / this.scale;
+    const e = Math.cos(-this.angle * Math.PI / 180), s = Math.sin(-this.angle * Math.PI / 180), h = t.x * e - t.y * s, o = t.x * s + t.y * e;
+    this.offset.x += h / this.scale, this.offset.y += o / this.scale;
   }
   draw(t) {
     if (!this.image)
@@ -177,22 +177,22 @@ class w extends d {
     ), e.restore(), t;
   }
   toBlob(t, e) {
-    return this.image ? new Promise((s, o) => {
+    return this.image ? new Promise((s, h) => {
       try {
-        this.getClipCanvas().toBlob((h) => {
-          s(h);
+        this.getClipCanvas().toBlob((o) => {
+          s(o);
         }, t ?? "image/png", e);
-      } catch (h) {
-        o(h);
+      } catch (o) {
+        h(o);
       }
     }) : Promise.reject(new Error("image not loaded"));
   }
   toDataUrl(t, e) {
-    return this.image ? new Promise((s, o) => {
+    return this.image ? new Promise((s, h) => {
       try {
         s(this.getClipCanvas().toDataURL(t ?? "image/png", e));
-      } catch (h) {
-        o(h);
+      } catch (o) {
+        h(o);
       }
     }) : Promise.reject(new Error("image not loaded"));
   }
@@ -254,8 +254,8 @@ class y extends d {
   }
   setRect(t) {
     super.setRect(t);
-    const { left: e, top: s, right: o, bottom: h } = t, n = o - e, r = h - s;
-    this.topLeft.setRect(new a(e - this.pointRadius, s - this.pointRadius, e + this.pointRadius * 2, s + this.pointRadius * 2)), this.topCenter.setRect(new a(e + n / 2 - this.pointRadius, s - this.pointRadius, e + n / 2 + this.pointRadius * 2, s + this.pointRadius * 2)), this.topRight.setRect(new a(o - this.pointRadius, s - this.pointRadius, o + this.pointRadius * 2, s + this.pointRadius * 2)), this.centerLeft.setRect(new a(e - this.pointRadius, s + r / 2 - this.pointRadius, e + this.pointRadius * 2, s + r / 2 + this.pointRadius * 2)), this.centerRight.setRect(new a(o - this.pointRadius, s + r / 2 - this.pointRadius, o + this.pointRadius * 2, s + r / 2 + this.pointRadius * 2)), this.bottomLeft.setRect(new a(e - this.pointRadius, h - this.pointRadius, e + this.pointRadius * 2, h + this.pointRadius * 2)), this.bottomCenter.setRect(new a(e + n / 2 - this.pointRadius, h - this.pointRadius, e + n / 2 + this.pointRadius * 2, h + this.pointRadius * 2)), this.bottomRight.setRect(new a(o - this.pointRadius, h - this.pointRadius, o + this.pointRadius * 2, h + this.pointRadius * 2));
+    const { left: e, top: s, right: h, bottom: o } = t, n = h - e, r = o - s;
+    this.topLeft.setRect(new a(e - this.pointRadius, s - this.pointRadius, e + this.pointRadius * 2, s + this.pointRadius * 2)), this.topCenter.setRect(new a(e + n / 2 - this.pointRadius, s - this.pointRadius, e + n / 2 + this.pointRadius * 2, s + this.pointRadius * 2)), this.topRight.setRect(new a(h - this.pointRadius, s - this.pointRadius, h + this.pointRadius * 2, s + this.pointRadius * 2)), this.centerLeft.setRect(new a(e - this.pointRadius, s + r / 2 - this.pointRadius, e + this.pointRadius * 2, s + r / 2 + this.pointRadius * 2)), this.centerRight.setRect(new a(h - this.pointRadius, s + r / 2 - this.pointRadius, h + this.pointRadius * 2, s + r / 2 + this.pointRadius * 2)), this.bottomLeft.setRect(new a(e - this.pointRadius, o - this.pointRadius, e + this.pointRadius * 2, o + this.pointRadius * 2)), this.bottomCenter.setRect(new a(e + n / 2 - this.pointRadius, o - this.pointRadius, e + n / 2 + this.pointRadius * 2, o + this.pointRadius * 2)), this.bottomRight.setRect(new a(h - this.pointRadius, o - this.pointRadius, h + this.pointRadius * 2, o + this.pointRadius * 2));
   }
   drawMask(t) {
     t.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
@@ -264,9 +264,9 @@ class y extends d {
     t.beginPath(), t.moveTo(e.x, e.y), t.lineTo(s.x, s.y), t.closePath(), t.strokeStyle = "rgba(255,255,255,0.31)", t.setLineDash([4, 5]), t.lineWidth = 1, t.stroke();
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect;
-    let n = o - e, r = h - s;
-    t.save(), t.beginPath(), t.rect(e, s, n, r), t.closePath(), t.strokeStyle = this.maskLineColor, t.lineWidth = this.maskLineWidth, t.stroke(), t.restore(), n = n / 4, r = r / 4, t.save(), this.drawLine(t, new i(e, s + r), new i(o, s + r)), this.drawLine(t, new i(e, s + r * 2), new i(o, s + r * 2)), this.drawLine(t, new i(e, s + r * 3), new i(o, s + r * 3)), this.drawLine(t, new i(e + n, s), new i(e + n, h)), this.drawLine(t, new i(e + n * 2, s), new i(e + n * 2, h)), this.drawLine(t, new i(e + n * 3, s), new i(e + n * 3, h)), t.restore(), super.draw(t);
+    const { left: e, top: s, right: h, bottom: o } = this.rect;
+    let n = h - e, r = o - s;
+    t.save(), t.beginPath(), t.rect(e, s, n, r), t.closePath(), t.strokeStyle = this.maskLineColor, t.lineWidth = this.maskLineWidth, t.stroke(), t.restore(), n = n / 4, r = r / 4, t.save(), this.drawLine(t, new i(e, s + r), new i(h, s + r)), this.drawLine(t, new i(e, s + r * 2), new i(h, s + r * 2)), this.drawLine(t, new i(e, s + r * 3), new i(h, s + r * 3)), this.drawLine(t, new i(e + n, s), new i(e + n, o)), this.drawLine(t, new i(e + n * 2, s), new i(e + n * 2, o)), this.drawLine(t, new i(e + n * 3, s), new i(e + n * 3, o)), t.restore(), super.draw(t);
   }
 }
 class u extends d {
@@ -289,8 +289,8 @@ class u extends d {
     return this.isChecked && (this.onEndLayout?.call(this, new i(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t, this.isChecked = !1), !1;
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect;
-    t.beginPath(), t.rect(e, s, o - e, h - s), t.closePath(), t.fillStyle = this.maskLineColor, t.fill();
+    const { left: e, top: s, right: h, bottom: o } = this.rect;
+    t.beginPath(), t.rect(e, s, h - e, o - s), t.closePath(), t.fillStyle = this.maskLineColor, t.fill();
   }
 }
 class L extends d {
@@ -310,7 +310,7 @@ class L extends d {
     if (this.isSelect)
       return !1;
     if (this.isChecked) {
-      const e = this.getRect(), s = new i(e.left + e.width / 2, e.top + e.height / 2), o = t.x - s.x, h = t.y - s.y, n = this.mousePoint.x - s.x, r = this.mousePoint.y - s.y, l = (Math.atan2(r, n) - Math.atan2(h, o)) * (180 / Math.PI);
+      const e = this.getRect(), s = new i(e.left + e.width / 2, e.top + e.height / 2), h = t.x - s.x, o = t.y - s.y, n = this.mousePoint.x - s.x, r = this.mousePoint.y - s.y, l = (Math.atan2(r, n) - Math.atan2(o, h)) * (180 / Math.PI);
       return this.onRotateLayout?.call(this, l), this.mousePoint = t, !0;
     }
     return super.move(t), !0;
@@ -328,13 +328,15 @@ class L extends d {
     this.handle.setOnMoveLayout(t);
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect, n = o - e, r = h - s;
+    const { left: e, top: s, right: h, bottom: o } = this.rect, n = h - e, r = o - s;
     t.fillStyle = this.maskColor, t.beginPath(), t.rect(e, s, n, r), this.handle.drawMask(t), t.closePath(), t.fill("evenodd"), super.draw(t);
   }
 }
 class p extends d {
   constructor(t, e) {
-    super(null, "auto", e), this.background = new R(this), this.overLayout = null, this.layoutList = [], this.canvas = t, this.canvas2D = t.getContext("2d"), this.setRect(new a(0, 0, this.canvas.width, this.canvas.height)), this.initBackground(), t.addEventListener("mousedown", this.onMouseDown.bind(this)), t.addEventListener("mousemove", this.onMouseMove.bind(this)), t.addEventListener("mouseup", this.onMouseUp.bind(this)), t.addEventListener("wheel", this.onMouseWheel.bind(this)), t.addEventListener("touchstart", this.onTouchStart.bind(this)), t.addEventListener("touchmove", this.onTouchMove.bind(this)), t.addEventListener("touchend", this.onTouchEnd.bind(this)), this.draw(this.canvas2D);
+    super(null, "auto", e), this.background = new R(this), this.overLayout = null, this.layoutList = [];
+    const { width: s, height: h } = t.getBoundingClientRect();
+    t.width = s, t.height = h, this.canvas = t, this.canvas2D = t.getContext("2d"), this.setRect(new a(0, 0, this.canvas.width, this.canvas.height)), this.initBackground(), t.addEventListener("mousedown", this.onMouseDown.bind(this)), t.addEventListener("mousemove", this.onMouseMove.bind(this)), t.addEventListener("mouseup", this.onMouseUp.bind(this)), t.addEventListener("wheel", this.onMouseWheel.bind(this)), t.addEventListener("touchstart", this.onTouchStart.bind(this)), t.addEventListener("touchmove", this.onTouchMove.bind(this)), t.addEventListener("touchend", this.onTouchEnd.bind(this)), this.draw(this.canvas2D);
   }
   setCursor(t) {
     this.canvas.style.cursor = t;
