@@ -652,7 +652,7 @@ class ImageCropper extends Layout {
     }
     onMouseWheel(event) {
         event.preventDefault();
-        this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaX));
+        this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaZ));
         this.draw(this.canvas2D);
     }
     setImage(image) {

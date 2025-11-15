@@ -8,6 +8,14 @@
     "build": "vite build && npx tsc",
     "preview": "vite preview"
   },
+  "module": "dist/image-cropper.es.js",
+  "types": "dist/types/image-cropper.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/image-cropper.es.js",
+      "types": "./dist/types/image-cropper.d.ts"
+    }
+  },
   "dependencies": {
   },
   "devDependencies": {

@@ -370,7 +370,7 @@ class p extends d {
     t.preventDefault(), this.over();
   }
   onMouseWheel(t) {
-    t.preventDefault(), this.wheel(new f(t.deltaX, t.deltaY, t.deltaX)), this.draw(this.canvas2D);
+    t.preventDefault(), this.wheel(new f(t.deltaX, t.deltaY, t.deltaZ)), this.draw(this.canvas2D);
   }
   setImage(t) {
     this.image = new w(this), this.image.setRect(this.rect.clone()), this.image.setImage(t), this.layoutList.push(this.image), this.draw(this.canvas2D);

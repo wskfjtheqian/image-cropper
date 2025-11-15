@@ -826,7 +826,7 @@ class ImageCropper extends Layout implements Root {
 
     protected onMouseWheel(event: WheelEvent) {
         event.preventDefault()
-        this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaX))
+        this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaZ))
         this.draw(this.canvas2D)
     }
 
@@ -896,6 +896,8 @@ class ImageCropper extends Layout implements Root {
             this.image?.setClipRect(rect.clone())
         })
     }
+
+    
 
 }
 
