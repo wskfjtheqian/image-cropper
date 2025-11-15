@@ -593,7 +593,8 @@ class MaskLayout extends Layout {
             return false
         }
         if (this.isChecked) {
-            const center = this.handle.getRect().center
+            const rect = this.getRect()
+            const center = new Point(rect.left + rect.width / 2, rect.top + rect.height / 2)
 
             const dx1 = point.x - center.x;
             const dy1 = point.y - center.y;
