@@ -95,7 +95,7 @@ abstract class Layout {
         borderWidth: 1,
         borderColor1: '#000000',
         borderColor2: '#ffffff',
-        pointRadius: 6,
+        pointRadius: 7,
     };
 
     constructor(parent: Layout | null, cursor: string, config?: ImageCropperOption) {
@@ -669,11 +669,11 @@ class PointLayout extends Layout {
         ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
         ctx.closePath()
 
-        ctx.fillStyle = this.config.borderColor1!
+        ctx.fillStyle = this.config.borderColor2!
         ctx.fill()
 
         ctx.lineWidth = this.config.borderWidth!
-        ctx.strokeStyle = this.config.borderColor2!
+        ctx.strokeStyle = this.config.borderColor1!
         ctx.stroke()
 
 
