@@ -182,7 +182,9 @@ abstract class Layout {
 
     public draw(ctx: CanvasRenderingContext2D): void {
         for (const layout of this.layoutList) {
+            ctx.save()
             layout.draw(ctx)
+            ctx.restore()
         }
     }
 
@@ -335,14 +337,11 @@ class ImageLayout extends Layout {
         }
 
         const center = new Point(this.clipRect.left + this.clipRect.width / 2, this.clipRect.top + this.clipRect.height / 2)
-
-        ctx.save();
-        ctx.translate(center.x, center.y);
-        ctx.scale(this.scale, this.scale);
+        ctx.translate(center.x, center.y)
+        ctx.scale(this.scale, this.scale)
         ctx.rotate(this.angle * Math.PI / 180)
-        ctx.translate(this.offset.x, this.offset.y);
-        ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
-        ctx.restore();
+        ctx.translate(this.offset.x, this.offset.y)
+        ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2)
     }
 
     protected getClipCanvas(): HTMLCanvasElement {
@@ -353,18 +352,13 @@ class ImageLayout extends Layout {
             throw new Error('no canvas context');
         }
 
-
-        // 设置canvas尺寸
         canvas.width = this.clipRect.width;
         canvas.height = this.clipRect.height;
-
-        ctx.save();
 
         ctx.translate(this.clipRect.width / 2, this.clipRect.height / 2);
         ctx.scale(this.scale, this.scale);
         ctx.rotate(this.angle * Math.PI / 180);
         ctx.translate(this.offset.x, this.offset.y);
-
         ctx.drawImage(
             this.image!,
             -this.image!.width / 2,
@@ -372,8 +366,6 @@ class ImageLayout extends Layout {
             this.image!.width,
             this.image!.height
         );
-
-        ctx.restore();
         return canvas
     }
 
@@ -571,6 +563,7 @@ class HandleLayout extends Layout {
     }
 
     private drawLine(ctx: CanvasRenderingContext2D, start: Point, end: Point): void {
+        ctx.save()
         ctx.beginPath()
         ctx.moveTo(start.x, start.y)
         ctx.lineTo(end.x, end.y)
@@ -586,6 +579,7 @@ class HandleLayout extends Layout {
         ctx.strokeStyle = this.config.guidelineColor2!;
         ctx.lineDashOffset = this.config.guidelineDsah!;
         ctx.stroke();
+        ctx.restore()
     }
 
     public draw(ctx: CanvasRenderingContext2D): void {
@@ -594,6 +588,7 @@ class HandleLayout extends Layout {
         let height = (bottom - top)
 
         ctx.lineWidth = this.config.borderWidth!;
+
 
         ctx.rect(left, top, width, height)
         ctx.strokeStyle = this.config.borderColor1!;
@@ -606,14 +601,12 @@ class HandleLayout extends Layout {
 
         width = width / 3
         height = height / 3
-        ctx.save()
+
         this.drawLine(ctx, new Point(left, top + height), new Point(right, top + height))
         this.drawLine(ctx, new Point(left, top + height * 2), new Point(right, top + height * 2))
 
         this.drawLine(ctx, new Point(left + width, top), new Point(left + width, bottom))
         this.drawLine(ctx, new Point(left + width * 2, top), new Point(left + width * 2, bottom))
-
-        ctx.restore()
 
         super.draw(ctx)
     }
@@ -670,13 +663,18 @@ class PointLayout extends Layout {
 
 
     public draw(ctx: CanvasRenderingContext2D): void {
+        ctx.beginPath()
         ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
+        ctx.closePath()
+
         ctx.fillStyle = this.config.borderColor1!
         ctx.fill()
 
         ctx.lineWidth = this.config.borderWidth!
         ctx.strokeStyle = this.config.borderColor2!
         ctx.stroke()
+
+
 
 
     }
