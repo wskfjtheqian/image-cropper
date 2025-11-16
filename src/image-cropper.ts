@@ -89,8 +89,8 @@ abstract class Layout {
         backgroundBoxColor0: '#fff',
         backgroundBoxColor1: '#ddd',
         guidelineWidth: 1,
-        guidelineColor1: '#ffffff88',
-        guidelineColor2: '#00000088',
+        guidelineColor1: '#ffffff60',
+        guidelineColor2: '#00000060',
         guidelineDsah: 4,
         borderWidth: 1,
         borderColor1: '#000000',
@@ -589,15 +589,17 @@ class HandleLayout extends Layout {
 
         ctx.lineWidth = this.config.borderWidth!;
 
-
-        ctx.rect(left, top, width, height)
-        ctx.strokeStyle = this.config.borderColor1!;
-        ctx.stroke()
-
+        ctx.beginPath()
         ctx.rect(left - 1, top - 1, width + 2, height + 2)
+        ctx.closePath()
         ctx.strokeStyle = this.config.borderColor2!;
         ctx.stroke()
 
+        ctx.beginPath()
+        ctx.rect(left, top, width, height)
+        ctx.closePath()
+        ctx.strokeStyle = this.config.borderColor1!;
+        ctx.stroke()
 
         width = width / 3
         height = height / 3
@@ -768,12 +770,15 @@ class MaskLayout extends Layout {
         const width = right - left
         const height = bottom - top
 
-        ctx.fillStyle = this.maskColor
+        ctx.save()
         ctx.beginPath()
         ctx.rect(left, top, width, height)
         this.handle.drawMask(ctx)
         ctx.closePath()
+
+        ctx.fillStyle = this.maskColor
         ctx.fill('evenodd')
+        ctx.restore()
 
         super.draw(ctx)
     }
