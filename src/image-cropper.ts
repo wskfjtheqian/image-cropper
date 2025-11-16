@@ -185,6 +185,10 @@ abstract class Layout {
             layout.draw(ctx)
         }
     }
+
+    public remove(): void {
+        this.parent?.layoutList.splice(this.parent.layoutList.indexOf(this), 1)
+    }
 }
 
 class BackgroundLayout extends Layout {
@@ -250,12 +254,20 @@ class ImageLayout extends Layout {
     protected image?: HTMLImageElement
     protected scale: number = 1;
     protected angle: number = 0;
-    // protected center: Point = new Point(0, 0);
     protected clipRect: Rect = new Rect(0, 0, 0, 0)
     protected offset: Point = new Point(0, 0);
 
     constructor(parent: Layout | null, cursor: string = "auto") {
         super(parent, cursor);
+    }
+
+    public reset(): void {
+        this.angle = 0;
+        this.offset = new Point(0, 0);
+        this.clipRect = new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom)
+        const scaleX = this.rect.width / this.image!.width;
+        const scaleY = this.rect.height / this.image!.height;
+        this.scale = Math.min(scaleX, scaleY)
     }
 
     public setRect(rect: Rect): void {
@@ -264,12 +276,10 @@ class ImageLayout extends Layout {
     }
 
     public setClipRect(rect: Rect): void {
-        console.log(rect)
         const offset = new Point(
             (this.clipRect.left + this.clipRect.width / 2) - (rect.left + rect.width / 2),
             (this.clipRect.top + this.clipRect.height / 2) - (rect.top + rect.height / 2),
         )
-        console.log(offset)
         this.moveImage(offset)
         this.clipRect = rect
     }
@@ -943,7 +953,12 @@ class ImageCropper extends Layout implements Root {
         })
     }
 
-
+    public reset(): void {
+        this.mask?.remove()
+        this.mask = undefined
+        this.image?.reset()
+        this.draw(this.canvas2D)
+    }
 }
 
 export default ImageCropper;
