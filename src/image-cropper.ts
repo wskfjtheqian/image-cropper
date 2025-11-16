@@ -1,9 +1,15 @@
 interface ImageCropperOption {
+    pointRadius?: number;
+    borderWidth?: number;
+    borderColor1?: string;
+    borderColor2?: string;
+    guidelineWidth?: number;
+    guidelineColor1?: string;
+    guidelineColor2?: string;
+    guidelineDsah?: number;
     outputWidth?: number
     outputHeight?: number
     maskHandleRadius?: number;
-    maskLineWidth?: number
-    maskLineColor?: string
     maskColor?: string;
     backgroundBoxSize?: number
     backgroundBoxColor0?: string
@@ -45,6 +51,10 @@ class Rect {
         this.bottom = bottom
     }
 
+    public static fromSize(left: number, top: number, width: number, height: number): Rect {
+        return new Rect(left, top, left + width, top + height)
+    }
+
     get width() {
         return this.right - this.left
     }
@@ -78,6 +88,14 @@ abstract class Layout {
         backgroundBoxSize: 10,
         backgroundBoxColor0: '#fff',
         backgroundBoxColor1: '#ddd',
+        guidelineWidth: 1,
+        guidelineColor1: '#ffffff88',
+        guidelineColor2: '#00000088',
+        guidelineDsah: 4,
+        borderWidth: 1,
+        borderColor1: '#000000',
+        borderColor2: '#ffffff',
+        pointRadius: 6,
     };
 
     constructor(parent: Layout | null, cursor: string, config?: ImageCropperOption) {
@@ -380,26 +398,33 @@ class ImageLayout extends Layout {
 }
 
 class HandleLayout extends Layout {
-    protected maskLineColor: string = '#000';
-    protected maskLineWidth: number = 2;
-    protected topLeft: PointLayout = new PointLayout(this, "nwse-resize")
-    protected topCenter: PointLayout = new PointLayout(this, "ns-resize")
-    protected topRight: PointLayout = new PointLayout(this, "nesw-resize")
-    protected centerLeft: PointLayout = new PointLayout(this, "ew-resize ")
-    protected centerRight: PointLayout = new PointLayout(this, "ew-resize ")
-    protected bottomLeft: PointLayout = new PointLayout(this, "nesw-resize")
-    protected bottomCenter: PointLayout = new PointLayout(this, "ns-resize")
-    protected bottomRight: PointLayout = new PointLayout(this, "nwse-resize")
+    protected topLeft: PointLayout
+    protected topCenter: PointLayout
+    protected topRight: PointLayout
+    protected centerLeft: PointLayout
+    protected centerRight: PointLayout
+    protected bottomLeft: PointLayout
+    protected bottomCenter: PointLayout
+    protected bottomRight: PointLayout
     protected layoutList: Layout[] = []
-    private pointRadius: number = 6;
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onMoveLayout: ((offset: Point) => void) | null = null
     protected onEndSelect: ((rect: Rect) => void) | null = null
 
 
-    constructor(parent: Layout, cursor: string = "move") {
-        super(parent, cursor)
+    constructor(parent: Layout, cursor: string = "move", config?: ImageCropperOption) {
+        super(parent, cursor, config)
+
+        this.topLeft = new PointLayout(this, "nwse-resize", config)
+        this.topCenter = new PointLayout(this, "ns-resize", config)
+        this.topRight = new PointLayout(this, "nesw-resize", config)
+        this.centerLeft = new PointLayout(this, "ew-resize", config)
+        this.centerRight = new PointLayout(this, "ew-resize", config)
+        this.bottomLeft = new PointLayout(this, "nesw-resize", config)
+        this.bottomCenter = new PointLayout(this, "ns-resize", config)
+        this.bottomRight = new PointLayout(this, "nwse-resize", config)
+
         this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this))
         this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this))
         this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this))
@@ -521,14 +546,14 @@ class HandleLayout extends Layout {
         const width = right - left
         const height = bottom - top
 
-        this.topLeft.setRect(new Rect(left - this.pointRadius, top - this.pointRadius, left + this.pointRadius * 2, top + this.pointRadius * 2))
-        this.topCenter.setRect(new Rect(left + width / 2 - this.pointRadius, top - this.pointRadius, left + width / 2 + this.pointRadius * 2, top + this.pointRadius * 2))
-        this.topRight.setRect(new Rect(right - this.pointRadius, top - this.pointRadius, right + this.pointRadius * 2, top + this.pointRadius * 2))
-        this.centerLeft.setRect(new Rect(left - this.pointRadius, top + height / 2 - this.pointRadius, left + this.pointRadius * 2, top + height / 2 + this.pointRadius * 2))
-        this.centerRight.setRect(new Rect(right - this.pointRadius, top + height / 2 - this.pointRadius, right + this.pointRadius * 2, top + height / 2 + this.pointRadius * 2))
-        this.bottomLeft.setRect(new Rect(left - this.pointRadius, bottom - this.pointRadius, left + this.pointRadius * 2, bottom + this.pointRadius * 2))
-        this.bottomCenter.setRect(new Rect(left + width / 2 - this.pointRadius, bottom - this.pointRadius, left + width / 2 + this.pointRadius * 2, bottom + this.pointRadius * 2))
-        this.bottomRight.setRect(new Rect(right - this.pointRadius, bottom - this.pointRadius, right + this.pointRadius * 2, bottom + this.pointRadius * 2))
+        this.topLeft.setRect(Rect.fromSize(left, top, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.topCenter.setRect(Rect.fromSize(left + width / 2, top, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.topRight.setRect(Rect.fromSize(right, top, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.centerLeft.setRect(Rect.fromSize(left, top + height / 2, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.centerRight.setRect(Rect.fromSize(right, top + height / 2, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.bottomLeft.setRect(Rect.fromSize(left, bottom, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.bottomCenter.setRect(Rect.fromSize(left + width / 2, bottom, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.bottomRight.setRect(Rect.fromSize(right, bottom, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
     }
 
     public drawMask(ctx: CanvasRenderingContext2D): void {
@@ -541,37 +566,42 @@ class HandleLayout extends Layout {
         ctx.lineTo(end.x, end.y)
         ctx.closePath()
 
-        ctx.strokeStyle = "rgba(255,255,255,0.31)"
-        ctx.setLineDash([4, 5])
-        ctx.lineWidth = 1
+        ctx.setLineDash([this.config.guidelineDsah!, this.config.guidelineDsah!]);
+        ctx.lineWidth = this.config.guidelineWidth!;
 
-        ctx.stroke()
+        ctx.strokeStyle = this.config.guidelineColor1!;
+        ctx.lineDashOffset = 0;
+        ctx.stroke();
+
+        ctx.strokeStyle = this.config.guidelineColor2!;
+        ctx.lineDashOffset = this.config.guidelineDsah!;
+        ctx.stroke();
     }
 
     public draw(ctx: CanvasRenderingContext2D): void {
         const {left, top, right, bottom} = this.rect
         let width = right - left
         let height = (bottom - top)
-        ctx.save()
-        ctx.beginPath()
+
+        ctx.lineWidth = this.config.borderWidth!;
+
         ctx.rect(left, top, width, height)
-        ctx.closePath()
-        ctx.strokeStyle = this.maskLineColor
-        ctx.lineWidth = this.maskLineWidth
+        ctx.strokeStyle = this.config.borderColor1!;
         ctx.stroke()
-        ctx.restore()
+
+        ctx.rect(left - 1, top - 1, width + 2, height + 2)
+        ctx.strokeStyle = this.config.borderColor2!;
+        ctx.stroke()
 
 
-        width = width / 4
-        height = height / 4
+        width = width / 3
+        height = height / 3
         ctx.save()
         this.drawLine(ctx, new Point(left, top + height), new Point(right, top + height))
         this.drawLine(ctx, new Point(left, top + height * 2), new Point(right, top + height * 2))
-        this.drawLine(ctx, new Point(left, top + height * 3), new Point(right, top + height * 3))
 
         this.drawLine(ctx, new Point(left + width, top), new Point(left + width, bottom))
         this.drawLine(ctx, new Point(left + width * 2, top), new Point(left + width * 2, bottom))
-        this.drawLine(ctx, new Point(left + width * 3, top), new Point(left + width * 3, bottom))
 
         ctx.restore()
 
@@ -580,7 +610,6 @@ class HandleLayout extends Layout {
 }
 
 class PointLayout extends Layout {
-    protected maskLineColor: string = '#000';
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onMoveLayout: ((offset: Point) => void) | null = null
@@ -592,6 +621,15 @@ class PointLayout extends Layout {
 
     public setOnEndLayout(callback: (offset: Point) => void) {
         this.onEndLayout = callback
+    }
+
+    public setRect(rect: Rect): void {
+        super.setRect(new Rect(
+            rect.left - this.config.pointRadius!,
+            rect.top - this.config.pointRadius!,
+            rect.right - this.config.pointRadius!,
+            rect.bottom - this.config.pointRadius!,
+        ))
     }
 
     public start(point: Point): boolean {
@@ -622,25 +660,29 @@ class PointLayout extends Layout {
 
 
     public draw(ctx: CanvasRenderingContext2D): void {
-        const {left, top, right, bottom} = this.rect
-        ctx.beginPath()
-        ctx.rect(left, top, right - left, bottom - top)
-        ctx.closePath()
-        ctx.fillStyle = this.maskLineColor
+        ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
+        ctx.fillStyle = this.config.borderColor1!
         ctx.fill()
+
+        ctx.lineWidth = this.config.borderWidth!
+        ctx.strokeStyle = this.config.borderColor2!
+        ctx.stroke()
+
+
     }
 }
 
 class MaskLayout extends Layout {
     protected maskColor: string = '#88888888';
-    protected isSelect: boolean = true;
-    protected handle: HandleLayout = new HandleLayout(this)
+    protected isSelect: boolean = true
+    protected handle: HandleLayout
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onRotateLayout: ((angle: number) => void) | null = null
 
-    constructor(parent: Layout, cursor: string = "pointer") {
-        super(parent, cursor)
+    constructor(parent: Layout, cursor: string = "pointer", config?: ImageCropperOption) {
+        super(parent, cursor, config)
+        this.handle = new HandleLayout(this, "move", config)
         this.layoutList.push(this.handle)
     }
 
@@ -733,7 +775,7 @@ class MaskLayout extends Layout {
 class ImageCropper extends Layout implements Root {
     protected canvas: HTMLCanvasElement;
     protected canvas2D: CanvasRenderingContext2D
-    protected background: BackgroundLayout = new BackgroundLayout(this);
+    protected background: BackgroundLayout
     protected mask?: MaskLayout
     protected image?: ImageLayout
     private overLayout: Layout | null = null;
@@ -741,6 +783,7 @@ class ImageCropper extends Layout implements Root {
 
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
         super(null, "auto", config)
+        this.background = new BackgroundLayout(this, config)
         const {width, height} = canvas.getBoundingClientRect();
         canvas.width = width;
         canvas.height = height;
@@ -877,7 +920,7 @@ class ImageCropper extends Layout implements Root {
             if (this.mask) {
                 return
             }
-            this.mask = new MaskLayout(this)
+            this.mask = new MaskLayout(this, "pointer", this.config)
             this.mask.setOnMoveLayout((offset: Point) => {
                 this.image?.moveImage(offset)
             })
