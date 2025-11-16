@@ -1,9 +1,15 @@
 interface ImageCropperOption {
+    pointRadius?: number;
+    borderWidth?: number;
+    borderColor1?: string;
+    borderColor2?: string;
+    guidelineWidth?: number;
+    guidelineColor1?: string;
+    guidelineColor2?: string;
+    guidelineDsah?: number;
     outputWidth?: number;
     outputHeight?: number;
     maskHandleRadius?: number;
-    maskLineWidth?: number;
-    maskLineColor?: string;
     maskColor?: string;
     backgroundBoxSize?: number;
     backgroundBoxColor0?: string;
@@ -26,6 +32,7 @@ declare class Rect {
     right: number;
     bottom: number;
     constructor(left: number, top: number, right: number, bottom: number);
+    static fromSize(left: number, top: number, width: number, height: number): Rect;
     get width(): number;
     get height(): number;
     get center(): Point;
@@ -54,6 +61,7 @@ declare abstract class Layout {
     out(): void;
     checkOverOut(point: Point): boolean;
     draw(ctx: CanvasRenderingContext2D): void;
+    remove(): void;
 }
 declare class BackgroundLayout extends Layout {
     protected mousePoint: Point;
@@ -77,6 +85,7 @@ declare class ImageLayout extends Layout {
     protected clipRect: Rect;
     protected offset: Point;
     constructor(parent: Layout | null, cursor?: string);
+    reset(): void;
     setRect(rect: Rect): void;
     setClipRect(rect: Rect): void;
     setImage(image: HTMLImageElement): void;
@@ -92,8 +101,6 @@ declare class ImageLayout extends Layout {
     toDataUrl(type?: string, quality?: any): Promise<string>;
 }
 declare class HandleLayout extends Layout {
-    protected maskLineColor: string;
-    protected maskLineWidth: number;
     protected topLeft: PointLayout;
     protected topCenter: PointLayout;
     protected topRight: PointLayout;
@@ -103,12 +110,11 @@ declare class HandleLayout extends Layout {
     protected bottomCenter: PointLayout;
     protected bottomRight: PointLayout;
     protected layoutList: Layout[];
-    private pointRadius;
     protected isChecked: boolean;
     protected mousePoint: Point;
     protected onMoveLayout: ((offset: Point) => void) | null;
     protected onEndSelect: ((rect: Rect) => void) | null;
-    constructor(parent: Layout, cursor?: string);
+    constructor(parent: Layout, cursor?: string, config?: ImageCropperOption);
     onEndLayout(): void;
     setOnMoveLayout(callback: (offset: Point) => void): void;
     setOnEndSelect(callback: (rect: Rect) => void): void;
@@ -129,13 +135,13 @@ declare class HandleLayout extends Layout {
     draw(ctx: CanvasRenderingContext2D): void;
 }
 declare class PointLayout extends Layout {
-    protected maskLineColor: string;
     protected isChecked: boolean;
     protected mousePoint: Point;
     protected onMoveLayout: ((offset: Point) => void) | null;
     protected onEndLayout: ((offset: Point) => void) | null;
     setOnMoveLayout(callback: (offset: Point) => void): void;
     setOnEndLayout(callback: (offset: Point) => void): void;
+    setRect(rect: Rect): void;
     start(point: Point): boolean;
     move(point: Point): boolean;
     end(point: Point): boolean;
@@ -148,7 +154,7 @@ declare class MaskLayout extends Layout {
     protected isChecked: boolean;
     protected mousePoint: Point;
     protected onRotateLayout: ((angle: number) => void) | null;
-    constructor(parent: Layout, cursor?: string);
+    constructor(parent: Layout, cursor?: string, config?: ImageCropperOption);
     setOnRotateLayout(callback: (angle: number) => void): void;
     setOnEndSelect(callback: (rect: Rect) => void): void;
     start(point: Point): boolean;
@@ -185,5 +191,6 @@ declare class ImageCropper extends Layout implements Root {
     toDataUrl(type?: string, quality?: any): Promise<string>;
     toBlob(type?: string, quality?: any): Promise<Blob | null>;
     private initBackground;
+    reset(): void;
 }
 export default ImageCropper;
