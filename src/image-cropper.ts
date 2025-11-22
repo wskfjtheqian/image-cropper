@@ -1,5 +1,96 @@
 const rotatingCursor: string = 'data:image/svg+xml;base64,PHN2ZyB0PSIxNzYzMzA4NTgxNTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1NzAiCiAgICAgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICAgIDxwYXRoIGQ9Ik00MjEuMTIgNTkwLjUwNjY2N0wzNjIuNjY2NjY3IDY0OC41MzMzMzNhMzI5LjM4NjY2NyAzMjkuMzg2NjY3IDAgMCAxIDIzLjQ2NjY2Ni00MDkuMTczMzMzIDguNTMzMzMzIDguNTMzMzMzIDAgMCAwLTkuODEzMzMzLTEzLjIyNjY2NyAzMTAuMTg2NjY3IDMxMC4xODY2NjcgMCAwIDAtODMuMiA0OTIuMzczMzM0TDI0MS45MiA3NjhhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMCAxMS45NDY2NjcgMjkuMDEzMzMzaDE3OS4yYTE3LjA2NjY2NiAxNy4wNjY2NjcgMCAwIDAgMTcuMDY2NjY2LTE3LjA2NjY2NnYtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0yOS4wMTMzMzMtMTAuMjR6TTYwMi44OCA0MzMuNDkzMzMzTDY2MS4zMzMzMzMgMzc1LjQ2NjY2N2EzMjkuMzg2NjY3IDMyOS4zODY2NjcgMCAwIDEtMjEuMzMzMzMzIDQwOS4xNzMzMzMgOC41MzMzMzMgOC41MzMzMzMgMCAwIDAgOS44MTMzMzMgMTMuMjI2NjY3IDMxMC4xODY2NjcgMzEwLjE4NjY2NyAwIDAgMCA4MS4wNjY2NjctNDkyLjM3MzMzNEw3ODIuMDggMjU2YTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAtMTEuOTQ2NjY3LTI5LjAxMzMzM2gtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0xNy4wNjY2NjYgMTcuMDY2NjY2djE3OS4yYTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAgMjkuMDEzMzMzIDEwLjI0eiIKICAgICAgICAgIHAtaWQ9IjE1NzEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiPjwvcGF0aD4KPC9zdmc+';
 
+class Svg {
+    protected width: number;
+    protected height: number;
+    protected angle: number = 0;
+    protected path: string[];
+    protected viewBox?: [number, number, number, number]; // [x, y, width, height]
+
+    constructor(width: number, height: number, viewBox: [number, number, number, number], path: string[]) {
+        this.width = width;
+        this.height = height;
+        this.path = path;
+        this.viewBox = viewBox;
+    }
+
+    public setAngle(angle: number): void {
+        this.angle = angle;
+    }
+
+    public setViewBox(x: number, y: number, width: number, height: number) {
+        this.viewBox = [x, y, width, height];
+    }
+
+    public draw(
+        ctx: CanvasRenderingContext2D,
+        drawWidth: number,
+        drawHeight: number,
+        strokeStyle: string = "#000",
+        fillStyle?: string,
+        strokeWidth: number = 1
+    ): void {
+        if (!this.path || this.path.length === 0) return;
+
+        ctx.save();
+
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        let vbX = 0, vbY = 0, vbWidth = this.width, vbHeight = this.height;
+        if (this.viewBox) {
+            [vbX, vbY, vbWidth, vbHeight] = this.viewBox;
+        }
+        const scaleX = drawWidth / vbWidth;
+        const scaleY = drawHeight / vbHeight;
+        const scale = Math.min(scaleX, scaleY);
+
+        ctx.translate(drawWidth / 2, drawHeight / 2);
+        ctx.rotate((this.angle * Math.PI) / 180);
+        ctx.scale(scale, scale);
+        ctx.translate(-vbWidth / 2 - vbX + 0.5 / scale, -vbHeight / 2 - vbY + 0.5 / scale);
+
+        const path2d = new Path2D();
+        for (const d of this.path) {
+            path2d.addPath(new Path2D(d));
+        }
+
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = Math.max(1, strokeWidth / scale); // 保证线宽不小于 1px
+
+        // 外描：先保存 transform，放大 path
+        // ctx.save();
+        // ctx.scale(1 + strokeWidth / vbWidth, 1 + strokeWidth / vbHeight); // 简单放大
+        ctx.stroke(path2d);
+        // ctx.restore();
+
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fill(path2d);
+        }
+
+        ctx.restore();
+    }
+}
+
+//中心点图标
+const centerIcon: Svg = new Svg(
+    20,
+    20,
+    [0, 0, 20, 20],
+    ["M10.9,0.1l0,2.8c3.3,0.4,5.8,3,6.2,6.2h2.8v1.8l-2.8,0c-0.4,3.3-3,5.8-6.2,6.2l0,2.8H9.1v-2.8c-3.3-0.4-5.8-3-6.2-6.2\n" +
+    "\tl-2.8,0V9.1h2.8c0.4-3.3,3-5.8,6.2-6.2V0.1H10.9z M10,4.6C7,4.6,4.6,7,4.6,10S7,15.4,10,15.4s5.4-2.4,5.4-5.4S13,4.6,10,4.6z\n" +
+    "\t M10,8.2c1,0,1.8,0.8,1.8,1.8c0,1-0.8,1.8-1.8,1.8S8.2,11,8.2,10C8.2,9,9,8.2,10,8.2z"]
+)
+
+const defaultIcon: Svg = new Svg(
+    200,
+    200,
+    [0, 0, 200, 200],
+    ["M10 10 H 190 V 190 H 10 Z"] // 一个简单矩形
+)
+
+
 
 interface ImageCropperOption {
     pointRadius?: number;
@@ -98,7 +189,7 @@ abstract class Layout {
         borderWidth: 1,
         borderColor1: '#000000',
         borderColor2: '#ffffff',
-        pointRadius: 7,
+        pointRadius: 10,
     };
 
     constructor(parent: Layout | null, cursor: string, config?: ImageCropperOption) {
@@ -403,6 +494,7 @@ class ImageLayout extends Layout {
 }
 
 class HandleLayout extends Layout {
+    protected center: PointLayout
     protected topLeft: PointLayout
     protected topCenter: PointLayout
     protected topRight: PointLayout
@@ -421,14 +513,15 @@ class HandleLayout extends Layout {
     constructor(parent: Layout, cursor: string = "move", config?: ImageCropperOption) {
         super(parent, cursor, config)
 
-        this.topLeft = new PointLayout(this, "nwse-resize", config)
-        this.topCenter = new PointLayout(this, "ns-resize", config)
-        this.topRight = new PointLayout(this, "nesw-resize", config)
-        this.centerLeft = new PointLayout(this, "ew-resize", config)
-        this.centerRight = new PointLayout(this, "ew-resize", config)
-        this.bottomLeft = new PointLayout(this, "nesw-resize", config)
-        this.bottomCenter = new PointLayout(this, "ns-resize", config)
-        this.bottomRight = new PointLayout(this, "nwse-resize", config)
+        this.center = new PointLayout(this, centerIcon, "move", config)
+        this.topLeft = new PointLayout(this, defaultIcon, "nwse-resize", config)
+        this.topCenter = new PointLayout(this, defaultIcon, "ns-resize", config)
+        this.topRight = new PointLayout(this, defaultIcon, "nesw-resize", config)
+        this.centerLeft = new PointLayout(this, defaultIcon, "ew-resize", config)
+        this.centerRight = new PointLayout(this, defaultIcon, "ew-resize", config)
+        this.bottomLeft = new PointLayout(this, defaultIcon, "nesw-resize", config)
+        this.bottomCenter = new PointLayout(this, defaultIcon, "ns-resize", config)
+        this.bottomRight = new PointLayout(this, defaultIcon, "nwse-resize", config)
 
         this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this))
         this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this))
@@ -456,7 +549,8 @@ class HandleLayout extends Layout {
             this.centerRight,
             this.bottomLeft,
             this.bottomCenter,
-            this.bottomRight
+            this.bottomRight,
+            this.center
         ]
     }
 
@@ -550,15 +644,17 @@ class HandleLayout extends Layout {
         const {left, top, right, bottom} = rect
         const width = right - left
         const height = bottom - top
+        const diameter = this.config.pointRadius! * 2
 
-        this.topLeft.setRect(Rect.fromSize(left, top, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.topCenter.setRect(Rect.fromSize(left + width / 2, top, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.topRight.setRect(Rect.fromSize(right, top, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.centerLeft.setRect(Rect.fromSize(left, top + height / 2, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.centerRight.setRect(Rect.fromSize(right, top + height / 2, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.bottomLeft.setRect(Rect.fromSize(left, bottom, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.bottomCenter.setRect(Rect.fromSize(left + width / 2, bottom, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
-        this.bottomRight.setRect(Rect.fromSize(right, bottom, this.config.pointRadius! * 2, this.config.pointRadius! * 2))
+        this.center.setRect(Rect.fromSize(left + width / 2, top + height / 2, diameter, diameter))
+        this.topLeft.setRect(Rect.fromSize(left, top, diameter, diameter))
+        this.topCenter.setRect(Rect.fromSize(left + width / 2, top, diameter, diameter))
+        this.topRight.setRect(Rect.fromSize(right, top, diameter, diameter))
+        this.centerLeft.setRect(Rect.fromSize(left, top + height / 2, diameter, diameter))
+        this.centerRight.setRect(Rect.fromSize(right, top + height / 2, diameter, diameter))
+        this.bottomLeft.setRect(Rect.fromSize(left, bottom, diameter, diameter))
+        this.bottomCenter.setRect(Rect.fromSize(left + width / 2, bottom, diameter, diameter))
+        this.bottomRight.setRect(Rect.fromSize(right, bottom, diameter, diameter))
     }
 
     public drawMask(ctx: CanvasRenderingContext2D): void {
@@ -617,11 +713,18 @@ class HandleLayout extends Layout {
     }
 }
 
+
 class PointLayout extends Layout {
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onMoveLayout: ((offset: Point) => void) | null = null
     protected onEndLayout: ((offset: Point) => void) | null = null
+    protected icon: Svg
+
+    constructor(parent: Layout, icon: Svg, cursor: string = "move", config?: ImageCropperOption) {
+        super(parent, cursor, config)
+        this.icon = icon
+    }
 
     public setOnMoveLayout(callback: (offset: Point) => void) {
         this.onMoveLayout = callback
@@ -668,20 +771,15 @@ class PointLayout extends Layout {
 
 
     public draw(ctx: CanvasRenderingContext2D): void {
-        ctx.beginPath()
-        ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
-        ctx.closePath()
-
-        ctx.fillStyle = this.config.borderColor2!
-        ctx.fill()
-
-        ctx.lineWidth = this.config.borderWidth!
-        ctx.strokeStyle = this.config.borderColor1!
-        ctx.stroke()
-
-
-
-
+        ctx.save()
+        ctx.translate(this.rect.left, this.rect.top)
+        this.icon.draw(
+            ctx, this.rect.width, this.rect.height,
+            this.config.borderColor1!,
+            this.config.borderColor2!,
+            this.config.borderWidth!
+        )
+        ctx.restore()
     }
 }
 
