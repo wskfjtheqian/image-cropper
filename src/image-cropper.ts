@@ -5,13 +5,19 @@ class Svg {
     protected height: number;
     protected angle: number = 0;
     protected path: string[];
-    protected viewBox?: [number, number, number, number]; // [x, y, width, height]
+    protected viewBox: [number, number, number, number]; // [x, y, width, height]
 
     constructor(width: number, height: number, viewBox: [number, number, number, number], path: string[]) {
         this.width = width;
         this.height = height;
         this.path = path;
         this.viewBox = viewBox;
+    }
+
+    public clone(): Svg {
+        const svg = new Svg(this.width, this.height, this.viewBox, this.path);
+        svg.setAngle(this.angle);
+        return svg;
     }
 
     public setAngle(angle: number): void {
@@ -75,21 +81,27 @@ class Svg {
 
 //中心点图标
 const centerIcon: Svg = new Svg(
-    20,
-    20,
-    [0, 0, 20, 20],
-    ["M10.9,0.1l0,2.8c3.3,0.4,5.8,3,6.2,6.2h2.8v1.8l-2.8,0c-0.4,3.3-3,5.8-6.2,6.2l0,2.8H9.1v-2.8c-3.3-0.4-5.8-3-6.2-6.2\n" +
-    "\tl-2.8,0V9.1h2.8c0.4-3.3,3-5.8,6.2-6.2V0.1H10.9z M10,4.6C7,4.6,4.6,7,4.6,10S7,15.4,10,15.4s5.4-2.4,5.4-5.4S13,4.6,10,4.6z\n" +
-    "\t M10,8.2c1,0,1.8,0.8,1.8,1.8c0,1-0.8,1.8-1.8,1.8S8.2,11,8.2,10C8.2,9,9,8.2,10,8.2z"]
+    24,
+    24,
+    [0, 0, 24, 24],
+    ["M14.16,12c0,1.19-0.97,2.16-2.16,2.16S9.84,13.19,9.84,12S10.81,9.84,12,9.84S14.16,10.81,14.16,12z M24,9.84v4.32h-2.83\n" +
+    "\tc-0.81,3.47-3.54,6.19-7.01,7.01V24H9.84v-2.83c-3.47-0.81-6.19-3.54-7.01-7.01H0V9.84h2.83c0.81-3.47,3.54-6.19,7.01-7.01V0h4.32\n" +
+    "\tv2.83c3.47,0.81,6.19,3.54,7.01,7.01H24z M18.3,12c0-3.48-2.82-6.3-6.3-6.3S5.7,8.52,5.7,12s2.82,6.3,6.3,6.3S18.3,15.48,18.3,12z"]
 )
 
-const defaultIcon: Svg = new Svg(
-    200,
-    200,
-    [0, 0, 200, 200],
-    ["M10 10 H 190 V 190 H 10 Z"] // 一个简单矩形
+const edgeIcon: Svg = new Svg(
+    24,
+    24,
+    [0, 0, 24, 24],
+    ["M0,4.96h24V11H0V4.96z"] // 一个简单矩形
 )
 
+const cornerIcon: Svg = new Svg(
+    24,
+    24,
+    [0, 0, 24, 24],
+    ["M12.91,4.96 L0,4.96 L0,11 L12.91,11 L12.91,24 L18.95,24 L18.95,11 L18.95,4.96 Z"] // 一个简单矩形
+)
 
 
 interface ImageCropperOption {
@@ -186,10 +198,10 @@ abstract class Layout {
         guidelineColor1: '#ffffff60',
         guidelineColor2: '#00000060',
         guidelineDsah: 4,
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor1: '#000000',
         borderColor2: '#ffffff',
-        pointRadius: 10,
+        pointRadius: 12,
     };
 
     constructor(parent: Layout | null, cursor: string, config?: ImageCropperOption) {
@@ -513,15 +525,15 @@ class HandleLayout extends Layout {
     constructor(parent: Layout, cursor: string = "move", config?: ImageCropperOption) {
         super(parent, cursor, config)
 
-        this.center = new PointLayout(this, centerIcon, "move", config)
-        this.topLeft = new PointLayout(this, defaultIcon, "nwse-resize", config)
-        this.topCenter = new PointLayout(this, defaultIcon, "ns-resize", config)
-        this.topRight = new PointLayout(this, defaultIcon, "nesw-resize", config)
-        this.centerLeft = new PointLayout(this, defaultIcon, "ew-resize", config)
-        this.centerRight = new PointLayout(this, defaultIcon, "ew-resize", config)
-        this.bottomLeft = new PointLayout(this, defaultIcon, "nesw-resize", config)
-        this.bottomCenter = new PointLayout(this, defaultIcon, "ns-resize", config)
-        this.bottomRight = new PointLayout(this, defaultIcon, "nwse-resize", config)
+        this.center = new PointLayout(this, centerIcon, 0, "move", config)
+        this.topLeft = new PointLayout(this, cornerIcon, -90, "nwse-resize", config)
+        this.topCenter = new PointLayout(this, edgeIcon, 0, "ns-resize", config)
+        this.topRight = new PointLayout(this, cornerIcon, 0, "nesw-resize", config)
+        this.centerLeft = new PointLayout(this, edgeIcon, -90, "ew-resize", config)
+        this.centerRight = new PointLayout(this, edgeIcon, 90, "ew-resize", config)
+        this.bottomLeft = new PointLayout(this, cornerIcon, 180, "nesw-resize", config)
+        this.bottomCenter = new PointLayout(this, edgeIcon, 180, "ns-resize", config)
+        this.bottomRight = new PointLayout(this, cornerIcon, 90, "nwse-resize", config)
 
         this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this))
         this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this))
@@ -721,9 +733,10 @@ class PointLayout extends Layout {
     protected onEndLayout: ((offset: Point) => void) | null = null
     protected icon: Svg
 
-    constructor(parent: Layout, icon: Svg, cursor: string = "move", config?: ImageCropperOption) {
+    constructor(parent: Layout, icon: Svg, angle: number, cursor: string = "move", config?: ImageCropperOption) {
         super(parent, cursor, config)
-        this.icon = icon
+        this.icon = icon.clone()
+        this.icon.setAngle(angle)
     }
 
     public setOnMoveLayout(callback: (offset: Point) => void) {
