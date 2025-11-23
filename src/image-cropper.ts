@@ -67,8 +67,8 @@ class Svg {
         // 外描：先保存 transform，放大 path
         // ctx.save();
         // ctx.scale(1 + strokeWidth / vbWidth, 1 + strokeWidth / vbHeight); // 简单放大
-        ctx.stroke(path2d);
         // ctx.restore();
+        ctx.stroke(path2d);
 
         if (fillStyle) {
             ctx.fillStyle = fillStyle;
@@ -525,7 +525,7 @@ class HandleLayout extends Layout {
     constructor(parent: Layout, cursor: string = "move", config?: ImageCropperOption) {
         super(parent, cursor, config)
 
-        this.center = new PointLayout(this, centerIcon, 0, "move", config)
+        this.center = new CenterLayout(this, centerIcon, 0, "move", config)
         this.topLeft = new PointLayout(this, cornerIcon, -90, "nwse-resize", config)
         this.topCenter = new PointLayout(this, edgeIcon, 0, "ns-resize", config)
         this.topRight = new PointLayout(this, cornerIcon, 0, "nesw-resize", config)
@@ -790,6 +790,21 @@ class PointLayout extends Layout {
             ctx, this.rect.width, this.rect.height,
             this.config.borderColor1!,
             this.config.borderColor2!,
+            this.config.borderWidth!
+        )
+        ctx.restore()
+    }
+}
+
+class CenterLayout extends PointLayout {
+
+    public draw(ctx: CanvasRenderingContext2D): void {
+        ctx.save()
+        ctx.translate(this.rect.left, this.rect.top)
+        this.icon.draw(
+            ctx, this.rect.width, this.rect.height,
+            this.config.borderColor2!,
+            this.config.borderColor1!,
             this.config.borderWidth!
         )
         ctx.restore()
