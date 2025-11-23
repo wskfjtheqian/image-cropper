@@ -32,6 +32,7 @@
     const image = new Image();
     image.crossOrigin = "anonymous"; // 必须在 src 之前设置
     image.src = 'https://img-s.msn.cn/tenant/amp/entityid/AA1HWO7G.img';
+    cropper.setOutSize(800, 600)
     cropper.setImage(image)
 
     setInterval(() => {
