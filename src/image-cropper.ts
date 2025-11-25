@@ -84,10 +84,9 @@ const centerIcon: Svg = new Svg(
     24,
     24,
     [0, 0, 24, 24],
-    ["M13.99,12c0,1.1-0.89,1.99-1.99,1.99S10.01,13.1,10.01,12s0.89-1.99,1.99-1.99S13.99,10.9,13.99,12z M23.06,10.01v3.98\n" +
-    "\th-2.61c-0.75,3.2-3.26,5.71-6.46,6.46v2.61h-3.98v-2.61c-3.2-0.75-5.71-3.26-6.46-6.46H0.94v-3.98h2.61\n" +
-    "\tc0.75-3.2,3.26-5.71,6.46-6.46V0.94h3.98v2.61c3.2,0.75,5.71,3.26,6.46,6.46H23.06z M17.8,12c0-3.21-2.6-5.8-5.8-5.8\n" +
-    "\tS6.2,8.79,6.2,12s2.6,5.8,5.8,5.8S17.8,15.21,17.8,12z"]
+    ["M13.6,12c0,0.9-0.7,1.6-1.6,1.6s-1.6-0.7-1.6-1.6s0.7-1.6,1.6-1.6S13.6,11.1,13.6,12z M21,10.4v3.3h-2.1\n" +
+    "\tc-0.6,2.6-2.7,4.7-5.3,5.3V21h-3.3v-2.1c-2.6-0.6-4.7-2.7-5.3-5.3H3v-3.3h2.1c0.6-2.6,2.7-4.7,5.3-5.3V3h3.3v2.1\n" +
+    "\tc2.6,0.6,4.7,2.7,5.3,5.3H21z M16.7,12c0-2.6-2.1-4.7-4.7-4.7S7.3,9.4,7.3,12s2.1,4.7,4.7,4.7S16.7,14.6,16.7,12z"]
 )
 
 const edgeIcon: Svg = new Svg(
@@ -306,9 +305,16 @@ class BackgroundLayout extends Layout {
     protected onStartSelect: ((rect: Rect) => void) | null = null
     protected onMoveSelect: ((rect: Rect) => void) | null = null
     protected onEndSelect: ((rect: Rect) => void) | null = null
+    private outWidth?: number | null;
+    private outHeight?: number | null;
 
     constructor(parent: Layout | null, config?: ImageCropperOption) {
         super(parent, 'crosshair', config);
+    }
+
+    public setOutSize(width: number, height: number) {
+        this.outWidth = width
+        this.outHeight = height
     }
 
     public setOnStartSelect(callback: (rect: Rect) => void) {
@@ -332,8 +338,16 @@ class BackgroundLayout extends Layout {
     }
 
     public move(point: Point): boolean {
-        this.selectRect.right += point.x - this.mousePoint.x
-        this.selectRect.bottom += point.y - this.mousePoint.y
+        const rect = this.selectRect.clone()
+        rect.right += point.x - this.mousePoint.x
+        rect.bottom += point.y - this.mousePoint.y
+        if (this.outWidth && this.outHeight) {
+            const scale = Math.min(rect.width / this.outWidth, rect.height / this.outHeight)
+            rect.right = rect.left + this.outWidth * scale
+            rect.bottom = rect.top + this.outHeight * scale
+        }
+
+        this.selectRect = rect
         this.mousePoint = point
         this.onMoveSelect?.call(this, this.selectRect)
         return true
@@ -365,9 +379,16 @@ class ImageLayout extends Layout {
     protected angle: number = 0;
     protected clipRect: Rect = new Rect(0, 0, 0, 0)
     protected offset: Point = new Point(0, 0);
+    private outWidth?: number | null;
+    private outHeight?: number | null;
 
     constructor(parent: Layout | null, cursor: string = "auto") {
         super(parent, cursor);
+    }
+
+    public setOutSize(width?: number | null, height?: number | null): void {
+        this.outWidth = width
+        this.outHeight = height
     }
 
     public reset(): void {
@@ -459,11 +480,19 @@ class ImageLayout extends Layout {
             throw new Error('no canvas context');
         }
 
-        canvas.width = this.clipRect.width;
-        canvas.height = this.clipRect.height;
+        let scale: number = 1
+        if (this.outWidth && this.outHeight) {
+            scale = Math.min(this.outWidth / this.clipRect.width, this.outHeight / this.clipRect.height)
+        } else if (this.outWidth) {
+            scale = this.outWidth / this.clipRect.width
+        } else if (this.outHeight) {
+            scale = this.outHeight / this.clipRect.height
+        }
+        canvas.width = this.clipRect.width * scale;
+        canvas.height = this.clipRect.height * scale;
 
-        ctx.translate(this.clipRect.width / 2, this.clipRect.height / 2);
-        ctx.scale(this.scale, this.scale);
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(this.scale * scale, this.scale * scale);
         ctx.rotate(this.angle * Math.PI / 180);
         ctx.translate(this.offset.x, this.offset.y);
         ctx.drawImage(
@@ -521,6 +550,8 @@ class HandleLayout extends Layout {
     protected mousePoint: Point = new Point(0, 0);
     protected onMoveLayout: ((offset: Point) => void) | null = null
     protected onEndSelect: ((rect: Rect) => void) | null = null
+    private outWidth?: number | null;
+    private outHeight?: number | null;
 
 
     constructor(parent: Layout, cursor: string = "move", config?: ImageCropperOption) {
@@ -580,46 +611,112 @@ class HandleLayout extends Layout {
     }
 
     protected onMoveTopLeft(offset: Point): void {
-        this.rect.left = this.rect.left + offset.x
-        this.rect.top = this.rect.top + offset.y
+        const rect = this.rect.clone()
+        rect.left += offset.x
+        rect.top += offset.y
+        if (this.outWidth && this.outHeight) {
+            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight
+            const width = this.outWidth * scale
+            const height = this.outHeight * scale
+            rect.left += rect.width - width
+            rect.top += rect.height - height
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveTopCenter(offset: Point): void {
-        this.rect.top = this.rect.top + offset.y
+        const rect = this.rect.clone()
+        rect.top += offset.y
+        if (this.outWidth && this.outHeight) {
+            const scale = rect.height / this.outHeight
+            const width = this.outWidth * scale
+            rect.left += (rect.width - width) / 2
+            rect.right = rect.left + width
+            rect.bottom = rect.top + this.outHeight * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveTopRight(offset: Point): void {
-        this.rect.right = this.rect.right + offset.x
-        this.rect.top = this.rect.top + offset.y
+        const rect = this.rect.clone()
+        rect.right += offset.x
+        rect.top += offset.y
+        if (this.outWidth && this.outHeight) {
+            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight
+            rect.right = rect.left + this.outWidth * scale
+            rect.top += rect.height - this.outHeight * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveCenterLeft(offset: Point): void {
-        this.rect.left = this.rect.left + offset.x
+        const rect = this.rect.clone()
+        rect.left += offset.x
+        if (this.outWidth && this.outHeight) {
+            const scale = rect.width / this.outWidth
+            const height = this.outHeight * scale
+            rect.top += (rect.height - height) / 2
+            rect.bottom = rect.top + height
+            rect.right = rect.left + this.outWidth * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveCenterRight(offset: Point): void {
-        this.rect.right = this.rect.right + offset.x
+        const rect = this.rect.clone()
+        rect.right += offset.x
+        if (this.outWidth && this.outHeight) {
+            const scale = rect.width / this.outWidth
+            const height = this.outHeight * scale
+            rect.top += (rect.height - height) / 2
+            rect.bottom = rect.top + height
+            rect.right = rect.left + this.outWidth * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveBottomLeft(offset: Point): void {
-        this.rect.left = this.rect.left + offset.x
-        this.rect.bottom = this.rect.bottom + offset.y
+        const rect = this.rect.clone()
+        rect.left += offset.x
+        rect.bottom += offset.y
+        if (this.outWidth && this.outHeight) {
+            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight
+            rect.left += (rect.width - this.outWidth * scale)
+            rect.bottom = rect.top + this.outHeight * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveBottomCenter(offset: Point): void {
-        this.rect.bottom = this.rect.bottom + offset.y
+        const rect = this.rect.clone()
+        rect.bottom += offset.y
+        if (this.outWidth && this.outHeight) {
+            const scale = rect.height / this.outHeight
+            const width = this.outWidth * scale
+            rect.left += (rect.width - width) / 2
+            rect.right = rect.left + width
+            rect.bottom = rect.top + this.outHeight * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
     protected onMoveBottomRight(offset: Point): void {
-        this.rect.right = this.rect.right + offset.x
-        this.rect.bottom = this.rect.bottom + offset.y
+        const rect = this.rect.clone()
+        rect.right += offset.x
+        rect.bottom += offset.y
+        if (this.outWidth && this.outHeight) {
+            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight
+            rect.right = rect.left + this.outWidth * scale
+            rect.bottom = rect.top + this.outHeight * scale
+        }
+        this.rect = rect
         this.setRect(this.rect)
     }
 
@@ -723,6 +820,11 @@ class HandleLayout extends Layout {
         this.drawLine(ctx, new Point(left + width * 2, top), new Point(left + width * 2, bottom))
 
         super.draw(ctx)
+    }
+
+    setOutSize(outWidth?: number | null, outHeight?: number | null) {
+        this.outWidth = outWidth
+        this.outHeight = outHeight
     }
 }
 
@@ -913,6 +1015,9 @@ class MaskLayout extends Layout {
         super.draw(ctx)
     }
 
+    public setOutSize(outWidth?: number | null, outHeight?: number | null) {
+        this.handle.setOutSize(outWidth, outHeight)
+    }
 }
 
 class ImageCropper extends Layout implements Root {
@@ -923,6 +1028,8 @@ class ImageCropper extends Layout implements Root {
     protected image?: ImageLayout
     private overLayout: Layout | null = null;
     protected layoutList: Layout[] = []
+    private outWidth?: number | null;
+    private outHeight?: number | null;
 
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
         super(null, "auto", config)
@@ -1023,6 +1130,7 @@ class ImageCropper extends Layout implements Root {
         this.image = new ImageLayout(this)
         this.image.setRect(this.rect.clone())
         this.image.setImage(image)
+        this.image.setOutSize(this.outWidth, this.outHeight)
         this.layoutList.push(this.image)
 
         this.draw(this.canvas2D)
@@ -1064,6 +1172,7 @@ class ImageCropper extends Layout implements Root {
                 return
             }
             this.mask = new MaskLayout(this, `url(${rotatingCursor}), auto`, this.config)
+            this.mask.setOutSize(this.outWidth, this.outHeight)
             this.mask.setOnMoveLayout((offset: Point) => {
                 this.image?.moveImage(offset)
             })
@@ -1093,8 +1202,12 @@ class ImageCropper extends Layout implements Root {
         this.draw(this.canvas2D)
     }
 
-    setOutSize(width: number, height: number) {
-
+    public setOutSize(width: number, height: number) {
+        this.outWidth = width
+        this.outHeight = height
+        this.background?.setOutSize(width, height)
+        this.image?.setOutSize(width, height)
+        this.mask?.setOutSize(width, height)
     }
 }
 

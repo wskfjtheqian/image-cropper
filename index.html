@@ -8,8 +8,11 @@
 <body style="display: flex">
 <canvas id="image-cropper" style="width: 800px; height: 600px;"></canvas>
 <button id="reset-button">Reset</button>
-<img id="image-preview" src="" alt="Preview" style="display: none; width: 300px; height: 300px; object-fit: contain;">
-
+<div>
+    <img id="image-preview" src="" alt="Preview"
+         style="display: none; width: 300px; height: 300px; object-fit: contain;">
+    <p id="info"></p>
+</div>
 
 <script type="module" src="/src/image-cropper.ts"></script>
 <script type="module">
@@ -40,6 +43,16 @@
             const preview = document.getElementById('image-preview')
             preview.src = url
             preview.style.display = 'block'
+            //获得真实图片大小
+            const img = new Image()
+            img.src = url
+            img.onload = () => {
+                document.getElementById('info').innerHTML = `
+                图片尺寸：${image.width} x ${image.height}<br>
+                裁剪尺寸：${img.width} x ${img.height}<br>
+            `
+            }
+
         })
     }, 33.3333)
 
