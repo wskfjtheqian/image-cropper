@@ -1,20 +1,68 @@
-const M = "data:image/svg+xml;base64,PHN2ZyB0PSIxNzYzMzA4NTgxNTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1NzAiCiAgICAgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICAgIDxwYXRoIGQ9Ik00MjEuMTIgNTkwLjUwNjY2N0wzNjIuNjY2NjY3IDY0OC41MzMzMzNhMzI5LjM4NjY2NyAzMjkuMzg2NjY3IDAgMCAxIDIzLjQ2NjY2Ni00MDkuMTczMzMzIDguNTMzMzMzIDguNTMzMzMzIDAgMCAwLTkuODEzMzMzLTEzLjIyNjY2NyAzMTAuMTg2NjY3IDMxMC4xODY2NjcgMCAwIDAtODMuMiA0OTIuMzczMzM0TDI0MS45MiA3NjhhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMCAxMS45NDY2NjcgMjkuMDEzMzMzaDE3OS4yYTE3LjA2NjY2NiAxNy4wNjY2NjcgMCAwIDAgMTcuMDY2NjY2LTE3LjA2NjY2NnYtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0yOS4wMTMzMzMtMTAuMjR6TTYwMi44OCA0MzMuNDkzMzMzTDY2MS4zMzMzMzMgMzc1LjQ2NjY2N2EzMjkuMzg2NjY3IDMyOS4zODY2NjcgMCAwIDEtMjEuMzMzMzMzIDQwOS4xNzMzMzMgOC41MzMzMzMgOC41MzMzMzMgMCAwIDAgOS44MTMzMzMgMTMuMjI2NjY3IDMxMC4xODY2NjcgMzEwLjE4NjY2NyAwIDAgMCA4MS4wNjY2NjctNDkyLjM3MzMzNEw3ODIuMDggMjU2YTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAtMTEuOTQ2NjY3LTI5LjAxMzMzM2gtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0xNy4wNjY2NjYgMTcuMDY2NjY2djE3OS4yYTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAgMjkuMDEzMzMzIDEwLjI0eiIKICAgICAgICAgIHAtaWQ9IjE1NzEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiPjwvcGF0aD4KPC9zdmc+";
-class i {
+const b = "data:image/svg+xml;base64,PHN2ZyB0PSIxNzYzMzA4NTgxNTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1NzAiCiAgICAgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICAgIDxwYXRoIGQ9Ik00MjEuMTIgNTkwLjUwNjY2N0wzNjIuNjY2NjY3IDY0OC41MzMzMzNhMzI5LjM4NjY2NyAzMjkuMzg2NjY3IDAgMCAxIDIzLjQ2NjY2Ni00MDkuMTczMzMzIDguNTMzMzMzIDguNTMzMzMzIDAgMCAwLTkuODEzMzMzLTEzLjIyNjY2NyAzMTAuMTg2NjY3IDMxMC4xODY2NjcgMCAwIDAtODMuMiA0OTIuMzczMzM0TDI0MS45MiA3NjhhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMCAxMS45NDY2NjcgMjkuMDEzMzMzaDE3OS4yYTE3LjA2NjY2NiAxNy4wNjY2NjcgMCAwIDAgMTcuMDY2NjY2LTE3LjA2NjY2NnYtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0yOS4wMTMzMzMtMTAuMjR6TTYwMi44OCA0MzMuNDkzMzMzTDY2MS4zMzMzMzMgMzc1LjQ2NjY2N2EzMjkuMzg2NjY3IDMyOS4zODY2NjcgMCAwIDEtMjEuMzMzMzMzIDQwOS4xNzMzMzMgOC41MzMzMzMgOC41MzMzMzMgMCAwIDAgOS44MTMzMzMgMTMuMjI2NjY3IDMxMC4xODY2NjcgMzEwLjE4NjY2NyAwIDAgMCA4MS4wNjY2NjctNDkyLjM3MzMzNEw3ODIuMDggMjU2YTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAtMTEuOTQ2NjY3LTI5LjAxMzMzM2gtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0xNy4wNjY2NjYgMTcuMDY2NjY2djE3OS4yYTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAgMjkuMDEzMzMzIDEwLjI0eiIKICAgICAgICAgIHAtaWQ9IjE1NzEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiPjwvcGF0aD4KPC9zdmc+";
+class m {
+  // [x, y, width, height]
+  constructor(t, e, i, s) {
+    this.angle = 0, this.width = t, this.height = e, this.path = s, this.viewBox = i;
+  }
+  clone() {
+    const t = new m(this.width, this.height, this.viewBox, this.path);
+    return t.setAngle(this.angle), t;
+  }
+  setAngle(t) {
+    this.angle = t;
+  }
+  setViewBox(t, e, i, s) {
+    this.viewBox = [t, e, i, s];
+  }
+  draw(t, e, i, s = "#000", h, a = 1) {
+    if (!this.path || this.path.length === 0) return;
+    t.save(), t.lineJoin = "round", t.lineCap = "round";
+    let r = 0, o = 0, g = this.width, d = this.height;
+    this.viewBox && ([r, o, g, d] = this.viewBox);
+    const p = e / g, v = i / d, M = Math.min(p, v);
+    t.translate(e / 2, i / 2), t.rotate(this.angle * Math.PI / 180), t.scale(M, M), t.translate(-g / 2 - r + 0.5 / M, -d / 2 - o + 0.5 / M);
+    const L = new Path2D();
+    for (const z of this.path)
+      L.addPath(new Path2D(z));
+    t.strokeStyle = s, t.lineWidth = Math.max(1, a / M), t.stroke(L), h && (t.fillStyle = h, t.fill(L)), t.restore();
+  }
+}
+const R = new m(
+  24,
+  24,
+  [0, 0, 24, 24],
+  [`M13.6,12c0,0.9-0.7,1.6-1.6,1.6s-1.6-0.7-1.6-1.6s0.7-1.6,1.6-1.6S13.6,11.1,13.6,12z M21,10.4v3.3h-2.1
+	c-0.6,2.6-2.7,4.7-5.3,5.3V21h-3.3v-2.1c-2.6-0.6-4.7-2.7-5.3-5.3H3v-3.3h2.1c0.6-2.6,2.7-4.7,5.3-5.3V3h3.3v2.1
+	c2.6,0.6,4.7,2.7,5.3,5.3H21z M16.7,12c0-2.6-2.1-4.7-4.7-4.7S7.3,9.4,7.3,12s2.1,4.7,4.7,4.7S16.7,14.6,16.7,12z`]
+), w = new m(
+  24,
+  24,
+  [0, 0, 24, 24],
+  ["M0,4.96h24V11H0V4.96z"]
+  // 一个简单矩形
+), y = new m(
+  24,
+  24,
+  [0, 0, 24, 24],
+  ["M12.91,4.96 L0,4.96 L0,11 L12.91,11 L12.91,24 L18.95,24 L18.95,11 L18.95,4.96 Z"]
+  // 一个简单矩形
+);
+class n {
   constructor(t, e) {
     this.x = t, this.y = e;
   }
 }
-class m {
-  constructor(t, e, s) {
-    this.x = t, this.y = e, this.z = s;
+class C {
+  constructor(t, e, i) {
+    this.x = t, this.y = e, this.z = i;
   }
 }
-class n {
-  constructor(t, e, s, o) {
-    this.left = t, this.top = e, this.right = s, this.bottom = o;
+class c {
+  constructor(t, e, i, s) {
+    this.left = t, this.top = e, this.right = i, this.bottom = s;
   }
-  static fromSize(t, e, s, o) {
-    return new n(t, e, t + s, e + o);
+  static fromSize(t, e, i, s) {
+    return new c(t, e, t + i, e + s);
   }
   get width() {
     return this.right - this.left;
@@ -23,15 +71,15 @@ class n {
     return this.bottom - this.top;
   }
   get center() {
-    return new i((this.right - this.left) / 2, (this.bottom - this.top) / 2);
+    return new n((this.right - this.left) / 2, (this.bottom - this.top) / 2);
   }
   clone() {
-    return new n(this.left, this.top, this.right, this.bottom);
+    return new c(this.left, this.top, this.right, this.bottom);
   }
 }
-class d {
-  constructor(t, e, s) {
-    this.layoutList = [], this.rect = new n(0, 0, 0, 0), this.parent = null, this.config = {
+class f {
+  constructor(t, e, i) {
+    this.layoutList = [], this.rect = new c(0, 0, 0, 0), this.parent = null, this.config = {
       backgroundBoxSize: 10,
       backgroundBoxColor0: "#fff",
       backgroundBoxColor1: "#ddd",
@@ -39,11 +87,11 @@ class d {
       guidelineColor1: "#ffffff60",
       guidelineColor2: "#00000060",
       guidelineDsah: 4,
-      borderWidth: 1,
+      borderWidth: 1.5,
       borderColor1: "#000000",
       borderColor2: "#ffffff",
-      pointRadius: 7
-    }, this.parent = t, this.cursor = e, Object.assign(this.config, s);
+      pointRadius: 12
+    }, this.parent = t, this.cursor = e, Object.assign(this.config, i);
   }
   setRect(t) {
     this.rect = t;
@@ -103,9 +151,12 @@ class d {
     this.parent?.layoutList.splice(this.parent.layoutList.indexOf(this), 1);
   }
 }
-class y extends d {
+class k extends f {
   constructor(t, e) {
-    super(t, "crosshair", e), this.mousePoint = new i(0, 0), this.selectRect = new n(0, 0, 0, 0), this.onStartSelect = null, this.onMoveSelect = null, this.onEndSelect = null;
+    super(t, "crosshair", e), this.mousePoint = new n(0, 0), this.selectRect = new c(0, 0, 0, 0), this.onStartSelect = null, this.onMoveSelect = null, this.onEndSelect = null;
+  }
+  setOutSize(t, e) {
+    this.outWidth = t, this.outHeight = e;
   }
   setOnStartSelect(t) {
     this.onStartSelect = t;
@@ -117,37 +168,45 @@ class y extends d {
     this.onEndSelect = t;
   }
   start(t) {
-    return this.mousePoint = t, this.selectRect = new n(t.x, t.y, t.x, t.y), this.onStartSelect?.call(this, this.selectRect), !0;
+    return this.mousePoint = t, this.selectRect = new c(t.x, t.y, t.x, t.y), this.onStartSelect?.call(this, this.selectRect), !0;
   }
   move(t) {
-    return this.selectRect.right += t.x - this.mousePoint.x, this.selectRect.bottom += t.y - this.mousePoint.y, this.mousePoint = t, this.onMoveSelect?.call(this, this.selectRect), !0;
+    const e = this.selectRect.clone();
+    if (e.right += t.x - this.mousePoint.x, e.bottom += t.y - this.mousePoint.y, this.outWidth && this.outHeight) {
+      const i = Math.min(e.width / this.outWidth, e.height / this.outHeight);
+      e.right = e.left + this.outWidth * i, e.bottom = e.top + this.outHeight * i;
+    }
+    return this.selectRect = e, this.mousePoint = t, this.onMoveSelect?.call(this, this.selectRect), !0;
   }
   end() {
     return this.onEndSelect?.call(this, this.selectRect), !0;
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect, r = o - e, a = h - s;
-    for (let l = 0; l < a; l += this.config.backgroundBoxSize) {
-      let f = Math.floor(l / this.config.backgroundBoxSize) % 2 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1;
-      for (let g = 0; g < r; g += this.config.backgroundBoxSize)
-        t.fillStyle = f = f === this.config.backgroundBoxColor1 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1, t.fillRect(g, l, this.config.backgroundBoxSize, this.config.backgroundBoxSize);
+    const { left: e, top: i, right: s, bottom: h } = this.rect, a = s - e, r = h - i;
+    for (let o = 0; o < r; o += this.config.backgroundBoxSize) {
+      let g = Math.floor(o / this.config.backgroundBoxSize) % 2 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1;
+      for (let d = 0; d < a; d += this.config.backgroundBoxSize)
+        t.fillStyle = g = g === this.config.backgroundBoxColor1 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1, t.fillRect(d, o, this.config.backgroundBoxSize, this.config.backgroundBoxSize);
     }
   }
 }
-class w extends d {
+class S extends f {
   constructor(t, e = "auto") {
-    super(t, e), this.scale = 1, this.angle = 0, this.clipRect = new n(0, 0, 0, 0), this.offset = new i(0, 0);
+    super(t, e), this.scale = 1, this.angle = 0, this.clipRect = new c(0, 0, 0, 0), this.offset = new n(0, 0), this.outType = 0;
+  }
+  setOutSize(t, e, i = 0) {
+    this.outWidth = t, this.outHeight = e, this.outType = i;
   }
   reset() {
-    this.angle = 0, this.offset = new i(0, 0), this.clipRect = new n(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom);
+    this.angle = 0, this.offset = new n(0, 0), this.clipRect = new c(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom);
     const t = this.rect.width / this.image.width, e = this.rect.height / this.image.height;
     this.scale = Math.min(t, e);
   }
   setRect(t) {
-    super.setRect(t), this.clipRect = new n(t.left, t.top, t.right, t.bottom);
+    super.setRect(t), this.clipRect = new c(t.left, t.top, t.right, t.bottom);
   }
   setClipRect(t) {
-    const e = new i(
+    const e = new n(
       this.clipRect.left + this.clipRect.width / 2 - (t.left + t.width / 2),
       this.clipRect.top + this.clipRect.height / 2 - (t.top + t.height / 2)
     );
@@ -155,8 +214,8 @@ class w extends d {
   }
   setImage(t) {
     this.image = t;
-    const e = this.rect.width / t.width, s = this.rect.height / t.height;
-    this.scale = Math.min(e, s);
+    const e = this.rect.width / t.width, i = this.rect.height / t.height;
+    this.scale = Math.min(e, i);
   }
   setRotate(t) {
     this.angle -= t;
@@ -174,20 +233,21 @@ class w extends d {
     return t.y < 0 ? this.scale *= 1 + 0.1 : this.scale *= 1 - 0.1, this.scale = Math.max(0.1, Math.min(5, this.scale)), !0;
   }
   moveImage(t) {
-    const e = Math.cos(-this.angle * Math.PI / 180), s = Math.sin(-this.angle * Math.PI / 180), o = t.x * e - t.y * s, h = t.x * s + t.y * e;
-    this.offset.x += o / this.scale, this.offset.y += h / this.scale;
+    const e = Math.cos(-this.angle * Math.PI / 180), i = Math.sin(-this.angle * Math.PI / 180), s = t.x * e - t.y * i, h = t.x * i + t.y * e;
+    this.offset.x += s / this.scale, this.offset.y += h / this.scale;
   }
   draw(t) {
     if (!this.image)
       return;
-    const e = new i(this.clipRect.left + this.clipRect.width / 2, this.clipRect.top + this.clipRect.height / 2);
+    const e = new n(this.clipRect.left + this.clipRect.width / 2, this.clipRect.top + this.clipRect.height / 2);
     t.translate(e.x, e.y), t.scale(this.scale, this.scale), t.rotate(this.angle * Math.PI / 180), t.translate(this.offset.x, this.offset.y), t.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
   }
   getClipCanvas() {
     const t = document.createElement("canvas"), e = t.getContext("2d");
     if (!e)
       throw new Error("no canvas context");
-    return t.width = this.clipRect.width, t.height = this.clipRect.height, e.translate(this.clipRect.width / 2, this.clipRect.height / 2), e.scale(this.scale, this.scale), e.rotate(this.angle * Math.PI / 180), e.translate(this.offset.x, this.offset.y), e.drawImage(
+    let i = 1;
+    return this.outType == 0 && (this.outWidth && this.outHeight ? i = Math.min(this.outWidth / this.clipRect.width, this.outHeight / this.clipRect.height) : this.outWidth ? i = this.outWidth / this.clipRect.width : this.outHeight && (i = this.outHeight / this.clipRect.height)), t.width = this.clipRect.width * i, t.height = this.clipRect.height * i, e.translate(t.width / 2, t.height / 2), e.scale(this.scale * i, this.scale * i), e.rotate(this.angle * Math.PI / 180), e.translate(this.offset.x, this.offset.y), e.drawImage(
       this.image,
       -this.image.width / 2,
       -this.image.height / 2,
@@ -196,29 +256,29 @@ class w extends d {
     ), t;
   }
   toBlob(t, e) {
-    return this.image ? new Promise((s, o) => {
+    return this.image ? new Promise((i, s) => {
       try {
         this.getClipCanvas().toBlob((h) => {
-          s(h);
+          i(h);
         }, t ?? "image/png", e);
       } catch (h) {
-        o(h);
+        s(h);
       }
     }) : Promise.reject(new Error("image not loaded"));
   }
   toDataUrl(t, e) {
-    return this.image ? new Promise((s, o) => {
+    return this.image ? new Promise((i, s) => {
       try {
-        s(this.getClipCanvas().toDataURL(t ?? "image/png", e));
+        i(this.getClipCanvas().toDataURL(t ?? "image/png", e));
       } catch (h) {
-        o(h);
+        s(h);
       }
     }) : Promise.reject(new Error("image not loaded"));
   }
 }
-class L extends d {
-  constructor(t, e = "move", s) {
-    super(t, e, s), this.layoutList = [], this.isChecked = !1, this.mousePoint = new i(0, 0), this.onMoveLayout = null, this.onEndSelect = null, this.topLeft = new u(this, "nwse-resize", s), this.topCenter = new u(this, "ns-resize", s), this.topRight = new u(this, "nesw-resize", s), this.centerLeft = new u(this, "ew-resize", s), this.centerRight = new u(this, "ew-resize", s), this.bottomLeft = new u(this, "nesw-resize", s), this.bottomCenter = new u(this, "ns-resize", s), this.bottomRight = new u(this, "nwse-resize", s), this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this)), this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this)), this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this)), this.centerLeft.setOnMoveLayout(this.onMoveCenterLeft.bind(this)), this.centerRight.setOnMoveLayout(this.onMoveCenterRight.bind(this)), this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this)), this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this)), this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this)), this.topLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.topCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.topRight.setOnEndLayout(this.onEndLayout.bind(this)), this.centerLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.centerRight.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomRight.setOnEndLayout(this.onEndLayout.bind(this)), this.layoutList = [
+class j extends f {
+  constructor(t, e = "move", i) {
+    super(t, e, i), this.layoutList = [], this.isChecked = !1, this.mousePoint = new n(0, 0), this.onMoveLayout = null, this.onEndSelect = null, this.center = new I(this, R, 0, "move", i), this.topLeft = new l(this, y, -90, "nwse-resize", i), this.topCenter = new l(this, w, 0, "ns-resize", i), this.topRight = new l(this, y, 0, "nesw-resize", i), this.centerLeft = new l(this, w, -90, "ew-resize", i), this.centerRight = new l(this, w, 90, "ew-resize", i), this.bottomLeft = new l(this, y, 180, "nesw-resize", i), this.bottomCenter = new l(this, w, 180, "ns-resize", i), this.bottomRight = new l(this, y, 90, "nwse-resize", i), this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this)), this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this)), this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this)), this.centerLeft.setOnMoveLayout(this.onMoveCenterLeft.bind(this)), this.centerRight.setOnMoveLayout(this.onMoveCenterRight.bind(this)), this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this)), this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this)), this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this)), this.topLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.topCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.topRight.setOnEndLayout(this.onEndLayout.bind(this)), this.centerLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.centerRight.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomRight.setOnEndLayout(this.onEndLayout.bind(this)), this.layoutList = [
       this.topLeft,
       this.topCenter,
       this.topRight,
@@ -226,7 +286,8 @@ class L extends d {
       this.centerRight,
       this.bottomLeft,
       this.bottomCenter,
-      this.bottomRight
+      this.bottomRight,
+      this.center
     ];
   }
   onEndLayout() {
@@ -239,58 +300,101 @@ class L extends d {
     this.onEndSelect = t;
   }
   onMoveTopLeft(t) {
-    this.rect.left = this.rect.left + t.x, this.rect.top = this.rect.top + t.y, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.left += t.x, e.top += t.y, this.outWidth && this.outHeight) {
+      const i = this.outWidth > this.outHeight ? e.width / this.outWidth : e.height / this.outHeight, s = this.outWidth * i, h = this.outHeight * i;
+      e.left += e.width - s, e.top += e.height - h;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveTopCenter(t) {
-    this.rect.top = this.rect.top + t.y, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.top += t.y, this.outWidth && this.outHeight) {
+      const i = e.height / this.outHeight, s = this.outWidth * i;
+      e.left += (e.width - s) / 2, e.right = e.left + s, e.bottom = e.top + this.outHeight * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveTopRight(t) {
-    this.rect.right = this.rect.right + t.x, this.rect.top = this.rect.top + t.y, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.right += t.x, e.top += t.y, this.outWidth && this.outHeight) {
+      const i = this.outWidth > this.outHeight ? e.width / this.outWidth : e.height / this.outHeight;
+      e.right = e.left + this.outWidth * i, e.top += e.height - this.outHeight * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveCenterLeft(t) {
-    this.rect.left = this.rect.left + t.x, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.left += t.x, this.outWidth && this.outHeight) {
+      const i = e.width / this.outWidth, s = this.outHeight * i;
+      e.top += (e.height - s) / 2, e.bottom = e.top + s, e.right = e.left + this.outWidth * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveCenterRight(t) {
-    this.rect.right = this.rect.right + t.x, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.right += t.x, this.outWidth && this.outHeight) {
+      const i = e.width / this.outWidth, s = this.outHeight * i;
+      e.top += (e.height - s) / 2, e.bottom = e.top + s, e.right = e.left + this.outWidth * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveBottomLeft(t) {
-    this.rect.left = this.rect.left + t.x, this.rect.bottom = this.rect.bottom + t.y, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.left += t.x, e.bottom += t.y, this.outWidth && this.outHeight) {
+      const i = this.outWidth > this.outHeight ? e.width / this.outWidth : e.height / this.outHeight;
+      e.left += e.width - this.outWidth * i, e.bottom = e.top + this.outHeight * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveBottomCenter(t) {
-    this.rect.bottom = this.rect.bottom + t.y, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.bottom += t.y, this.outWidth && this.outHeight) {
+      const i = e.height / this.outHeight, s = this.outWidth * i;
+      e.left += (e.width - s) / 2, e.right = e.left + s, e.bottom = e.top + this.outHeight * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   onMoveBottomRight(t) {
-    this.rect.right = this.rect.right + t.x, this.rect.bottom = this.rect.bottom + t.y, this.setRect(this.rect);
+    const e = this.rect.clone();
+    if (e.right += t.x, e.bottom += t.y, this.outWidth && this.outHeight) {
+      const i = this.outWidth > this.outHeight ? e.width / this.outWidth : e.height / this.outHeight;
+      e.right = e.left + this.outWidth * i, e.bottom = e.top + this.outHeight * i;
+    }
+    this.rect = e, this.setRect(this.rect);
   }
   start(t) {
     return super.start(t) ? !0 : this.checkPointInRect(t) ? (this.isChecked = !0, this.mousePoint = t, !0) : !1;
   }
   move(t) {
-    return this.isChecked && (this.onMoveLayout?.call(this, new i(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t), super.move(t);
+    return this.isChecked && (this.onMoveLayout?.call(this, new n(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t), super.move(t);
   }
   end(t) {
-    return this.isChecked && (this.onMoveLayout?.call(this, new i(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t, this.isChecked = !1), super.end(t);
+    return this.isChecked && (this.onMoveLayout?.call(this, new n(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t, this.isChecked = !1), super.end(t);
   }
   setRect(t) {
     super.setRect(t);
-    const { left: e, top: s, right: o, bottom: h } = t, r = o - e, a = h - s;
-    this.topLeft.setRect(n.fromSize(e, s, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.topCenter.setRect(n.fromSize(e + r / 2, s, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.topRight.setRect(n.fromSize(o, s, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.centerLeft.setRect(n.fromSize(e, s + a / 2, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.centerRight.setRect(n.fromSize(o, s + a / 2, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.bottomLeft.setRect(n.fromSize(e, h, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.bottomCenter.setRect(n.fromSize(e + r / 2, h, this.config.pointRadius * 2, this.config.pointRadius * 2)), this.bottomRight.setRect(n.fromSize(o, h, this.config.pointRadius * 2, this.config.pointRadius * 2));
+    const { left: e, top: i, right: s, bottom: h } = t, a = s - e, r = h - i, o = this.config.pointRadius * 2;
+    this.center.setRect(c.fromSize(e + a / 2, i + r / 2, o, o)), this.topLeft.setRect(c.fromSize(e, i, o, o)), this.topCenter.setRect(c.fromSize(e + a / 2, i, o, o)), this.topRight.setRect(c.fromSize(s, i, o, o)), this.centerLeft.setRect(c.fromSize(e, i + r / 2, o, o)), this.centerRight.setRect(c.fromSize(s, i + r / 2, o, o)), this.bottomLeft.setRect(c.fromSize(e, h, o, o)), this.bottomCenter.setRect(c.fromSize(e + a / 2, h, o, o)), this.bottomRight.setRect(c.fromSize(s, h, o, o));
   }
   drawMask(t) {
     t.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
   }
-  drawLine(t, e, s) {
-    t.save(), t.beginPath(), t.moveTo(e.x, e.y), t.lineTo(s.x, s.y), t.closePath(), t.setLineDash([this.config.guidelineDsah, this.config.guidelineDsah]), t.lineWidth = this.config.guidelineWidth, t.strokeStyle = this.config.guidelineColor1, t.lineDashOffset = 0, t.stroke(), t.strokeStyle = this.config.guidelineColor2, t.lineDashOffset = this.config.guidelineDsah, t.stroke(), t.restore();
+  drawLine(t, e, i) {
+    t.save(), t.beginPath(), t.moveTo(e.x, e.y), t.lineTo(i.x, i.y), t.closePath(), t.setLineDash([this.config.guidelineDsah, this.config.guidelineDsah]), t.lineWidth = this.config.guidelineWidth, t.strokeStyle = this.config.guidelineColor1, t.lineDashOffset = 0, t.stroke(), t.strokeStyle = this.config.guidelineColor2, t.lineDashOffset = this.config.guidelineDsah, t.stroke(), t.restore();
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect;
-    let r = o - e, a = h - s;
-    t.lineWidth = this.config.borderWidth, t.beginPath(), t.rect(e - 1, s - 1, r + 2, a + 2), t.closePath(), t.strokeStyle = this.config.borderColor2, t.stroke(), t.beginPath(), t.rect(e, s, r, a), t.closePath(), t.strokeStyle = this.config.borderColor1, t.stroke(), r = r / 3, a = a / 3, this.drawLine(t, new i(e, s + a), new i(o, s + a)), this.drawLine(t, new i(e, s + a * 2), new i(o, s + a * 2)), this.drawLine(t, new i(e + r, s), new i(e + r, h)), this.drawLine(t, new i(e + r * 2, s), new i(e + r * 2, h)), super.draw(t);
+    const { left: e, top: i, right: s, bottom: h } = this.rect;
+    let a = s - e, r = h - i;
+    t.lineWidth = this.config.borderWidth, t.beginPath(), t.rect(e - 1, i - 1, a + 2, r + 2), t.closePath(), t.strokeStyle = this.config.borderColor2, t.stroke(), t.beginPath(), t.rect(e, i, a, r), t.closePath(), t.strokeStyle = this.config.borderColor1, t.stroke(), a = a / 3, r = r / 3, this.drawLine(t, new n(e, i + r), new n(s, i + r)), this.drawLine(t, new n(e, i + r * 2), new n(s, i + r * 2)), this.drawLine(t, new n(e + a, i), new n(e + a, h)), this.drawLine(t, new n(e + a * 2, i), new n(e + a * 2, h)), super.draw(t);
+  }
+  setOutSize(t, e) {
+    this.outWidth = t, this.outHeight = e;
   }
 }
-class u extends d {
-  constructor() {
-    super(...arguments), this.isChecked = !1, this.mousePoint = new i(0, 0), this.onMoveLayout = null, this.onEndLayout = null;
+class l extends f {
+  constructor(t, e, i, s = "move", h) {
+    super(t, s, h), this.isChecked = !1, this.mousePoint = new n(0, 0), this.onMoveLayout = null, this.onEndLayout = null, this.icon = e.clone(), this.icon.setAngle(i);
   }
   setOnMoveLayout(t) {
     this.onMoveLayout = t;
@@ -299,7 +403,7 @@ class u extends d {
     this.onEndLayout = t;
   }
   setRect(t) {
-    super.setRect(new n(
+    super.setRect(new c(
       t.left - this.config.pointRadius,
       t.top - this.config.pointRadius,
       t.right - this.config.pointRadius,
@@ -310,18 +414,37 @@ class u extends d {
     return this.checkPointInRect(t) ? (this.isChecked = !0, this.mousePoint = t, !0) : !1;
   }
   move(t) {
-    return this.isChecked && (this.onMoveLayout?.call(this, new i(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t), !1;
+    return this.isChecked && (this.onMoveLayout?.call(this, new n(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t), !1;
   }
   end(t) {
-    return this.isChecked && (this.onEndLayout?.call(this, new i(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t, this.isChecked = !1), !1;
+    return this.isChecked && (this.onEndLayout?.call(this, new n(t.x - this.mousePoint.x, t.y - this.mousePoint.y)), this.mousePoint = t, this.isChecked = !1), !1;
   }
   draw(t) {
-    t.beginPath(), t.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height), t.closePath(), t.fillStyle = this.config.borderColor2, t.fill(), t.lineWidth = this.config.borderWidth, t.strokeStyle = this.config.borderColor1, t.stroke();
+    t.save(), t.translate(this.rect.left, this.rect.top), this.icon.draw(
+      t,
+      this.rect.width,
+      this.rect.height,
+      this.config.borderColor1,
+      this.config.borderColor2,
+      this.config.borderWidth
+    ), t.restore();
   }
 }
-class R extends d {
-  constructor(t, e = "pointer", s) {
-    super(t, e, s), this.maskColor = "#88888888", this.isSelect = !0, this.isChecked = !1, this.mousePoint = new i(0, 0), this.onRotateLayout = null, this.handle = new L(this, "move", s), this.layoutList.push(this.handle);
+class I extends l {
+  draw(t) {
+    t.save(), t.translate(this.rect.left, this.rect.top), this.icon.draw(
+      t,
+      this.rect.width,
+      this.rect.height,
+      this.config.borderColor2,
+      this.config.borderColor1,
+      this.config.borderWidth
+    ), t.restore();
+  }
+}
+class D extends f {
+  constructor(t, e = "pointer", i) {
+    super(t, e, i), this.maskColor = "#88888888", this.isSelect = !0, this.isChecked = !1, this.mousePoint = new n(0, 0), this.onRotateLayout = null, this.handle = new j(this, "move", i), this.layoutList.push(this.handle);
   }
   setOnRotateLayout(t) {
     this.onRotateLayout = t;
@@ -336,8 +459,8 @@ class R extends d {
     if (this.isSelect)
       return !1;
     if (this.isChecked) {
-      const e = this.getRect(), s = new i(e.left + e.width / 2, e.top + e.height / 2), o = t.x - s.x, h = t.y - s.y, r = this.mousePoint.x - s.x, a = this.mousePoint.y - s.y, l = (Math.atan2(a, r) - Math.atan2(h, o)) * (180 / Math.PI);
-      return this.onRotateLayout?.call(this, l), this.mousePoint = t, !0;
+      const e = this.getRect(), i = new n(e.left + e.width / 2, e.top + e.height / 2), s = t.x - i.x, h = t.y - i.y, a = this.mousePoint.x - i.x, r = this.mousePoint.y - i.y, o = (Math.atan2(r, a) - Math.atan2(h, s)) * (180 / Math.PI);
+      return this.onRotateLayout?.call(this, o), this.mousePoint = t, !0;
     }
     return super.move(t), !0;
   }
@@ -354,15 +477,18 @@ class R extends d {
     this.handle.setOnMoveLayout(t);
   }
   draw(t) {
-    const { left: e, top: s, right: o, bottom: h } = this.rect, r = o - e, a = h - s;
-    t.save(), t.beginPath(), t.rect(e, s, r, a), this.handle.drawMask(t), t.closePath(), t.fillStyle = this.maskColor, t.fill("evenodd"), t.restore(), super.draw(t);
+    const { left: e, top: i, right: s, bottom: h } = this.rect, a = s - e, r = h - i;
+    t.save(), t.beginPath(), t.rect(e, i, a, r), this.handle.drawMask(t), t.closePath(), t.fillStyle = this.maskColor, t.fill("evenodd"), t.restore(), super.draw(t);
+  }
+  setOutSize(t, e) {
+    this.handle.setOutSize(t, e);
   }
 }
-class p extends d {
+class N extends f {
   constructor(t, e) {
-    super(null, "auto", e), this.overLayout = null, this.layoutList = [], this.background = new y(this, e);
-    const { width: s, height: o } = t.getBoundingClientRect();
-    t.width = s, t.height = o, this.canvas = t, this.canvas2D = t.getContext("2d"), this.setRect(new n(0, 0, this.canvas.width, this.canvas.height)), this.initBackground(), t.addEventListener("mousedown", this.onMouseDown.bind(this)), t.addEventListener("mousemove", this.onMouseMove.bind(this)), t.addEventListener("mouseup", this.onMouseUp.bind(this)), t.addEventListener("wheel", this.onMouseWheel.bind(this)), t.addEventListener("touchstart", this.onTouchStart.bind(this)), t.addEventListener("touchmove", this.onTouchMove.bind(this)), t.addEventListener("touchend", this.onTouchEnd.bind(this)), this.draw(this.canvas2D);
+    super(null, "auto", e), this.overLayout = null, this.layoutList = [], this.outType = 0, this.background = new k(this, e);
+    const { width: i, height: s } = t.getBoundingClientRect();
+    t.width = i, t.height = s, this.canvas = t, this.canvas2D = t.getContext("2d"), this.setRect(new c(0, 0, this.canvas.width, this.canvas.height)), this.initBackground(), t.addEventListener("mousedown", this.onMouseDown.bind(this)), t.addEventListener("mousemove", this.onMouseMove.bind(this)), t.addEventListener("mouseup", this.onMouseUp.bind(this)), t.addEventListener("wheel", this.onMouseWheel.bind(this)), t.addEventListener("touchstart", this.onTouchStart.bind(this)), t.addEventListener("touchmove", this.onTouchMove.bind(this)), t.addEventListener("touchend", this.onTouchEnd.bind(this)), this.draw(this.canvas2D);
   }
   setCursor(t) {
     this.canvas.style.cursor = t;
@@ -377,31 +503,31 @@ class p extends d {
     return super.end(t), this.draw(this.canvas2D), !0;
   }
   onTouchStart(t) {
-    t.preventDefault(), t.touches.length !== 0 && this.start(new i(t.touches[0].clientX, t.touches[0].clientY));
+    t.preventDefault(), t.touches.length !== 0 && this.start(new n(t.touches[0].clientX, t.touches[0].clientY));
   }
   onTouchMove(t) {
-    t.preventDefault(), t.touches.length !== 0 && this.move(new i(t.touches[0].clientX, t.touches[0].clientY));
+    t.preventDefault(), t.touches.length !== 0 && this.move(new n(t.touches[0].clientX, t.touches[0].clientY));
   }
   onTouchEnd(t) {
-    t.preventDefault(), this.end(new i(t.changedTouches[0].clientX, t.changedTouches[0].clientY));
+    t.preventDefault(), this.end(new n(t.changedTouches[0].clientX, t.changedTouches[0].clientY));
   }
   onMouseDown(t) {
-    t.preventDefault(), this.start(new i(t.offsetX, t.offsetY));
+    t.preventDefault(), this.start(new n(t.offsetX, t.offsetY));
   }
   onMouseMove(t) {
-    t.preventDefault(), this.move(new i(t.offsetX, t.offsetY));
+    t.preventDefault(), this.move(new n(t.offsetX, t.offsetY));
   }
   onMouseUp(t) {
-    t.preventDefault(), this.end(new i(t.offsetX, t.offsetY));
+    t.preventDefault(), this.end(new n(t.offsetX, t.offsetY));
   }
   onMouseOver(t) {
     t.preventDefault(), this.over();
   }
   onMouseWheel(t) {
-    t.preventDefault(), this.wheel(new m(t.deltaX, t.deltaY, t.deltaZ)), this.draw(this.canvas2D);
+    t.preventDefault(), this.wheel(new C(t.deltaX, t.deltaY, t.deltaZ)), this.draw(this.canvas2D);
   }
   setImage(t) {
-    this.image = new w(this), this.image.setRect(this.rect.clone()), this.image.setImage(t), this.layoutList.push(this.image), this.draw(this.canvas2D);
+    this.image = new S(this), this.image.setRect(this.rect.clone()), this.image.setImage(t), this.image.setOutSize(this.outWidth, this.outHeight, this.outType), this.layoutList.push(this.image), this.draw(this.canvas2D);
   }
   setOverLayout(t) {
     this.overLayout != t && (this.overLayout?.out(), this.overLayout = t, this.overLayout.over());
@@ -414,7 +540,7 @@ class p extends d {
   }
   initBackground() {
     this.background.setRect(this.rect), this.layoutList.push(this.background), this.background.setOnStartSelect((t) => {
-      this.mask || (this.mask = new R(this, `url(${M}), auto`, this.config), this.mask.setOnMoveLayout((e) => {
+      this.mask || (this.mask = new D(this, `url(${b}), auto`, this.config), this.mask.setOutSize(this.outWidth, this.outHeight), this.mask.setOnMoveLayout((e) => {
         this.image?.moveImage(e);
       }), this.mask.setOnRotateLayout((e) => {
         this.image?.setRotate(e);
@@ -430,7 +556,10 @@ class p extends d {
   reset() {
     this.mask?.remove(), this.mask = void 0, this.image?.reset(), this.draw(this.canvas2D);
   }
+  setOutSize(t, e, i = 0) {
+    this.outWidth = t, this.outHeight = e, this.outType = i, this.background?.setOutSize(t, e), this.image?.setOutSize(t, e, i), this.mask?.setOutSize(t, e);
+  }
 }
 export {
-  p as default
+  N as default
 };

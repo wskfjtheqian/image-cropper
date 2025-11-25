@@ -1,5 +1,12 @@
 const rotatingCursor: string = 'data:image/svg+xml;base64,PHN2ZyB0PSIxNzYzMzA4NTgxNTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1NzAiCiAgICAgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICAgIDxwYXRoIGQ9Ik00MjEuMTIgNTkwLjUwNjY2N0wzNjIuNjY2NjY3IDY0OC41MzMzMzNhMzI5LjM4NjY2NyAzMjkuMzg2NjY3IDAgMCAxIDIzLjQ2NjY2Ni00MDkuMTczMzMzIDguNTMzMzMzIDguNTMzMzMzIDAgMCAwLTkuODEzMzMzLTEzLjIyNjY2NyAzMTAuMTg2NjY3IDMxMC4xODY2NjcgMCAwIDAtODMuMiA0OTIuMzczMzM0TDI0MS45MiA3NjhhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMCAxMS45NDY2NjcgMjkuMDEzMzMzaDE3OS4yYTE3LjA2NjY2NiAxNy4wNjY2NjcgMCAwIDAgMTcuMDY2NjY2LTE3LjA2NjY2NnYtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0yOS4wMTMzMzMtMTAuMjR6TTYwMi44OCA0MzMuNDkzMzMzTDY2MS4zMzMzMzMgMzc1LjQ2NjY2N2EzMjkuMzg2NjY3IDMyOS4zODY2NjcgMCAwIDEtMjEuMzMzMzMzIDQwOS4xNzMzMzMgOC41MzMzMzMgOC41MzMzMzMgMCAwIDAgOS44MTMzMzMgMTMuMjI2NjY3IDMxMC4xODY2NjcgMzEwLjE4NjY2NyAwIDAgMCA4MS4wNjY2NjctNDkyLjM3MzMzNEw3ODIuMDggMjU2YTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAtMTEuOTQ2NjY3LTI5LjAxMzMzM2gtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0xNy4wNjY2NjYgMTcuMDY2NjY2djE3OS4yYTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAgMjkuMDEzMzMzIDEwLjI0eiIKICAgICAgICAgIHAtaWQ9IjE1NzEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiPjwvcGF0aD4KPC9zdmc+';
 
+enum OutType {
+    // 尺寸
+    SIZE,
+    // 比例
+    RATIO,
+}
+
 class Svg {
     protected width: number;
     protected height: number;
@@ -381,14 +388,16 @@ class ImageLayout extends Layout {
     protected offset: Point = new Point(0, 0);
     private outWidth?: number | null;
     private outHeight?: number | null;
+    private outType: OutType = OutType.SIZE;
 
     constructor(parent: Layout | null, cursor: string = "auto") {
         super(parent, cursor);
     }
 
-    public setOutSize(width?: number | null, height?: number | null): void {
+    public setOutSize(width?: number | null, height?: number | null, type: OutType = OutType.SIZE): void {
         this.outWidth = width
         this.outHeight = height
+        this.outType = type
     }
 
     public reset(): void {
@@ -481,12 +490,14 @@ class ImageLayout extends Layout {
         }
 
         let scale: number = 1
-        if (this.outWidth && this.outHeight) {
-            scale = Math.min(this.outWidth / this.clipRect.width, this.outHeight / this.clipRect.height)
-        } else if (this.outWidth) {
-            scale = this.outWidth / this.clipRect.width
-        } else if (this.outHeight) {
-            scale = this.outHeight / this.clipRect.height
+        if (this.outType == OutType.SIZE) {
+            if (this.outWidth && this.outHeight) {
+                scale = Math.min(this.outWidth / this.clipRect.width, this.outHeight / this.clipRect.height)
+            } else if (this.outWidth) {
+                scale = this.outWidth / this.clipRect.width
+            } else if (this.outHeight) {
+                scale = this.outHeight / this.clipRect.height
+            }
         }
         canvas.width = this.clipRect.width * scale;
         canvas.height = this.clipRect.height * scale;
@@ -1026,10 +1037,11 @@ class ImageCropper extends Layout implements Root {
     protected background: BackgroundLayout
     protected mask?: MaskLayout
     protected image?: ImageLayout
-    private overLayout: Layout | null = null;
+    protected overLayout: Layout | null = null;
     protected layoutList: Layout[] = []
-    private outWidth?: number | null;
-    private outHeight?: number | null;
+    protected outWidth?: number | null;
+    protected outHeight?: number | null;
+    protected outType: OutType = OutType.SIZE;
 
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
         super(null, "auto", config)
@@ -1130,7 +1142,7 @@ class ImageCropper extends Layout implements Root {
         this.image = new ImageLayout(this)
         this.image.setRect(this.rect.clone())
         this.image.setImage(image)
-        this.image.setOutSize(this.outWidth, this.outHeight)
+        this.image.setOutSize(this.outWidth, this.outHeight, this.outType)
         this.layoutList.push(this.image)
 
         this.draw(this.canvas2D)
@@ -1202,11 +1214,12 @@ class ImageCropper extends Layout implements Root {
         this.draw(this.canvas2D)
     }
 
-    public setOutSize(width: number, height: number) {
+    public setOutSize(width: number, height: number, type: OutType = OutType.SIZE) {
         this.outWidth = width
         this.outHeight = height
+        this.outType = type
         this.background?.setOutSize(width, height)
-        this.image?.setOutSize(width, height)
+        this.image?.setOutSize(width, height, type)
         this.mask?.setOutSize(width, height)
     }
 }
