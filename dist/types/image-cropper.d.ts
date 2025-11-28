@@ -35,7 +35,12 @@ interface ImageCropperOption {
     outWidth?: number | null;
     outHeight?: number | null;
     circle?: boolean;
-    circleRadius?: number;
+    rectRadius?: number;
+    cursorColor?: string;
+    cursorSize?: number;
+    cursorSockerSize?: number;
+    cursorSockerColor?: string;
+    cursorSockerLineWidth?: number;
 }
 declare class Point {
     x: number;
