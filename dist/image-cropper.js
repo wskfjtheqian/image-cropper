@@ -1,9 +1,7 @@
-const rotatingCursor = 'data:image/svg+xml;base64,PHN2ZyB0PSIxNzYzMzA4NTgxNTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1NzAiCiAgICAgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICAgIDxwYXRoIGQ9Ik00MjEuMTIgNTkwLjUwNjY2N0wzNjIuNjY2NjY3IDY0OC41MzMzMzNhMzI5LjM4NjY2NyAzMjkuMzg2NjY3IDAgMCAxIDIzLjQ2NjY2Ni00MDkuMTczMzMzIDguNTMzMzMzIDguNTMzMzMzIDAgMCAwLTkuODEzMzMzLTEzLjIyNjY2NyAzMTAuMTg2NjY3IDMxMC4xODY2NjcgMCAwIDAtODMuMiA0OTIuMzczMzM0TDI0MS45MiA3NjhhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMCAxMS45NDY2NjcgMjkuMDEzMzMzaDE3OS4yYTE3LjA2NjY2NiAxNy4wNjY2NjcgMCAwIDAgMTcuMDY2NjY2LTE3LjA2NjY2NnYtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0yOS4wMTMzMzMtMTAuMjR6TTYwMi44OCA0MzMuNDkzMzMzTDY2MS4zMzMzMzMgMzc1LjQ2NjY2N2EzMjkuMzg2NjY3IDMyOS4zODY2NjcgMCAwIDEtMjEuMzMzMzMzIDQwOS4xNzMzMzMgOC41MzMzMzMgOC41MzMzMzMgMCAwIDAgOS44MTMzMzMgMTMuMjI2NjY3IDMxMC4xODY2NjcgMzEwLjE4NjY2NyAwIDAgMCA4MS4wNjY2NjctNDkyLjM3MzMzNEw3ODIuMDggMjU2YTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAtMTEuOTQ2NjY3LTI5LjAxMzMzM2gtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0xNy4wNjY2NjYgMTcuMDY2NjY2djE3OS4yYTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAgMjkuMDEzMzMzIDEwLjI0eiIKICAgICAgICAgIHAtaWQ9IjE1NzEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiPjwvcGF0aD4KPC9zdmc+';
+const minSize = 12;
 var OutType;
 (function (OutType) {
-    // 尺寸
     OutType[OutType["SIZE"] = 0] = "SIZE";
-    // 比例
     OutType[OutType["RATIO"] = 1] = "RATIO";
 })(OutType || (OutType = {}));
 class Svg {
@@ -14,9 +12,9 @@ class Svg {
         this.path = path;
         this.viewBox = viewBox;
     }
-    clone() {
+    clone(angle) {
         const svg = new Svg(this.width, this.height, this.viewBox, this.path);
-        svg.setAngle(this.angle);
+        svg.setAngle(angle ?? this.angle);
         return svg;
     }
     setAngle(angle) {
@@ -47,11 +45,7 @@ class Svg {
             path2d.addPath(new Path2D(d));
         }
         ctx.strokeStyle = strokeStyle;
-        ctx.lineWidth = Math.max(1, strokeWidth / scale); // 保证线宽不小于 1px
-        // 外描：先保存 transform，放大 path
-        // ctx.save();
-        // ctx.scale(1 + strokeWidth / vbWidth, 1 + strokeWidth / vbHeight); // 简单放大
-        // ctx.restore();
+        ctx.lineWidth = Math.max(1, strokeWidth / scale);
         ctx.stroke(path2d);
         if (fillStyle) {
             ctx.fillStyle = fillStyle;
@@ -60,14 +54,26 @@ class Svg {
         ctx.restore();
     }
 }
-//中心点图标
-const centerIcon = new Svg(24, 24, [0, 0, 24, 24], ["M13.6,12c0,0.9-0.7,1.6-1.6,1.6s-1.6-0.7-1.6-1.6s0.7-1.6,1.6-1.6S13.6,11.1,13.6,12z M21,10.4v3.3h-2.1\n" +
-        "\tc-0.6,2.6-2.7,4.7-5.3,5.3V21h-3.3v-2.1c-2.6-0.6-4.7-2.7-5.3-5.3H3v-3.3h2.1c0.6-2.6,2.7-4.7,5.3-5.3V3h3.3v2.1\n" +
-        "\tc2.6,0.6,4.7,2.7,5.3,5.3H21z M16.7,12c0-2.6-2.1-4.7-4.7-4.7S7.3,9.4,7.3,12s2.1,4.7,4.7,4.7S16.7,14.6,16.7,12z"]);
+const centerIcon = new Svg(24, 24, [0, 0, 24, 24], ["M13.6,12c0,0.9-0.7,1.6-1.6,1.6s-1.6-0.7-1.6-1.6s0.7-1.6,1.6-1.6S13.6,11.1,13.6,12z M21,10.4v3.3h-2.1" +
+        "c-0.6,2.6-2.7,4.7-5.3,5.3V21h-3.3v-2.1c-2.6-0.6-4.7-2.7-5.3-5.3H3v-3.3h2.1c0.6-2.6,2.7-4.7,5.3-5.3V3h3.3v2.1" +
+        "c2.6,0.6,4.7,2.7,5.3,5.3H21z M16.7,12c0-2.6-2.1-4.7-4.7-4.7S7.3,9.4,7.3,12s2.1,4.7,4.7,4.7S16.7,14.6,16.7,12z"]);
 const edgeIcon = new Svg(24, 24, [0, 0, 24, 24], ["M0,4.96h24V11H0V4.96z"] // 一个简单矩形
 );
-const cornerIcon = new Svg(24, 24, [0, 0, 24, 24], ["M12.91,4.96 L0,4.96 L0,11 L12.91,11 L12.91,24 L18.95,24 L18.95,11 L18.95,4.96 Z"] // 一个简单矩形
-);
+const cornerIcon = new Svg(24, 24, [0, 0, 24, 24], ["M12.91,4.96 L0,4.96 L0,11 L12.91,11 L12.91,24 L18.95,24 L18.95,11 L18.95,4.96 Z"]);
+const resizeIcon = new Svg(24, 24, [0, 0, 24, 24], ["M13.7,12L13.7,12l0-7.3H17L12,0.1L6.9,4.7h3.3v14.5H6.8l5.1,4.7l5.1-4.7h-3.3V12z"]);
+const rotateIcon = new Svg(24, 24, [0, 0, 24, 24], ["M20.8,18.3L20.8,18.3l-0.3,0c0,0,0,0,0,0c0-8.2-6.6-14.8-14.8-14.8c0,0-0.1,0-0.1,0V0.2L0.1,5.7l5.5,5.5V7.6c0,0,0.1,0,0.1,0c5.9,0," +
+        "10.7,4.8,10.7,10.7c0,0,0,0,0,0h-0.3l-0.1,0h-3.1l5.5,5.5l5.5-5.5H20.8z"]);
+const moveIcon = new Svg(24, 24, [0, 0, 24, 24], ["M19.3,17.1v-3.3h-5.5v5.5h3.3l-5.2,4.7l-5.1-4.7h3.3v-5.5H4.6v3.3L-0.1,12l4.7-5.2v3.4h5.5V4.7H6.8L12-0.1l5.1,4.7h-3.3v5.5h5.5V6.8L24,12L19.3,17.1z"]);
+const clipIcon = new Svg(24, 24, [0, 0, 24, 24], ["M24,13.9H13.9V24h-4V13.9H-0.1v-4H10v-10h4v10H24V13.9z"]);
+const handIcon = new Svg(24, 24, [0, 0, 24, 24], ["M18.8,5.4c-0.4,0-0.7,0.1-1,0.4c-0.3,0.3-0.4,0.6-0.4,1v5.6c0,0.3-0.2,0.4-0.4,0.4c-0.1,0-0.2,0-0.3-0.1" +
+        "c-0.1-0.1-0.1-0.2-0.1-0.3V3.1c0-0.4-0.1-0.7-0.4-1c-0.3-0.3-0.6-0.4-1-0.4c-0.4,0-0.7,0.1-1,0.4c-0.3,0.3-0.4,0.6-0.4,1v8" +
+        "c0,0.1,0,0.2-0.1,0.3c-0.1,0.1-0.2,0.1-0.3,0.1s-0.2,0-0.3-0.1c-0.1-0.1-0.1-0.2-0.1-0.3V1.9c0-0.4-0.1-0.7-0.4-1" +
+        "c-0.3-0.3-0.6-0.4-1-0.4c-0.4,0-0.7,0.1-1,0.4c-0.3,0.3-0.4,0.6-0.4,1v9.3c0,0.3-0.2,0.4-0.4,0.4c-0.1,0-0.2,0-0.3-0.1" +
+        "c-0.1-0.1-0.1-0.2-0.1-0.3v-8c0-0.4-0.1-0.7-0.4-1s-0.6-0.4-1-0.4s-0.7,0.1-1,0.4c-0.3,0.3-0.4,0.6-0.4,1v9.7c0,0.4-0.1,0.7-0.2,0.9" +
+        "c-0.1,0.2-0.2,0.3-0.4,0.4c-0.2,0-0.4,0-0.5-0.1c-0.2-0.1-0.4-0.4-0.6-0.7l-2-3.4C2.7,9.5,2.4,9.3,2.1,9.2c-0.3-0.1-0.7,0-1,0.1" +
+        "c-0.3,0.2-0.5,0.5-0.6,0.9c-0.1,0.4-0.1,0.8,0.1,1.1s0.2,0.3,0.2,0.3l0.5,1.1L3.8,18c0.6,1.2,1.2,2.2,1.8,3c0.5,0.6,1,1.1,1.5,1.5" +
+        "c0.3,0.3,0.7,0.4,1,0.6c0.2,0.1,0.3,0.1,0.4,0.1h6.1c0.9,0,1.8-0.3,2.5-1c0.6-0.5,1.1-1.2,1.5-2.1c1-2.1,1.6-4.8,1.6-8.2V6.8" +
+        "c0-0.4-0.1-0.7-0.4-1C19.6,5.6,19.2,5.4,18.8,5.4L18.8,5.4z"]);
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -204,16 +210,12 @@ class Layout {
 }
 class BackgroundLayout extends Layout {
     constructor(parent, config) {
-        super(parent, 'crosshair', config);
+        super(parent, clipIcon.clone(), config);
         this.mousePoint = new Point(0, 0);
         this.selectRect = new Rect(0, 0, 0, 0);
         this.onStartSelect = null;
         this.onMoveSelect = null;
         this.onEndSelect = null;
-    }
-    setOutSize(width, height) {
-        this.outWidth = width;
-        this.outHeight = height;
     }
     setOnStartSelect(callback) {
         this.onStartSelect = callback;
@@ -234,10 +236,10 @@ class BackgroundLayout extends Layout {
         const rect = this.selectRect.clone();
         rect.right += point.x - this.mousePoint.x;
         rect.bottom += point.y - this.mousePoint.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = Math.min(rect.width / this.outWidth, rect.height / this.outHeight);
-            rect.right = rect.left + this.outWidth * scale;
-            rect.bottom = rect.top + this.outHeight * scale;
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = Math.min(rect.width / this.config?.outWidth, rect.height / this.config?.outHeight);
+            rect.right = rect.left + this.config?.outWidth * scale;
+            rect.bottom = rect.top + this.config?.outHeight * scale;
         }
         this.selectRect = rect;
         this.mousePoint = point;
@@ -262,26 +264,28 @@ class BackgroundLayout extends Layout {
     }
 }
 class ImageLayout extends Layout {
-    constructor(parent, cursor = "auto") {
-        super(parent, cursor);
+    constructor(parent, cursor, config) {
+        super(parent, cursor, config);
         this.scale = 1;
         this.angle = 0;
         this.clipRect = new Rect(0, 0, 0, 0);
         this.offset = new Point(0, 0);
-        this.outType = OutType.SIZE;
     }
-    setOutSize(width, height, type = OutType.SIZE) {
-        this.outWidth = width;
-        this.outHeight = height;
-        this.outType = type;
+    initScale(rect) {
+        if (this.image) {
+            this.scale = Math.max(rect.width / this.image.width, rect.height / this.image.height);
+        }
     }
     reset() {
         this.angle = 0;
         this.offset = new Point(0, 0);
-        this.clipRect = new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom);
-        const scaleX = this.rect.width / this.image.width;
-        const scaleY = this.rect.height / this.image.height;
-        this.scale = Math.min(scaleX, scaleY);
+        if (this.config.defaultClipRect) {
+            this.scale = Math.max(this.clipRect.width / this.image.width, this.clipRect.height / this.image.height);
+        }
+        else {
+            this.clipRect = new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom);
+            this.scale = Math.min(this.rect.width / this.image.width, this.rect.height / this.image.height);
+        }
     }
     setRect(rect) {
         super.setRect(rect);
@@ -347,15 +351,15 @@ class ImageLayout extends Layout {
             throw new Error('no canvas context');
         }
         let scale = 1;
-        if (this.outType == OutType.SIZE) {
-            if (this.outWidth && this.outHeight) {
-                scale = Math.min(this.outWidth / this.clipRect.width, this.outHeight / this.clipRect.height);
+        if (this.config.outType == OutType.SIZE) {
+            if (this.config?.outWidth && this.config?.outHeight) {
+                scale = Math.min(this.config?.outWidth / this.clipRect.width, this.config?.outHeight / this.clipRect.height);
             }
-            else if (this.outWidth) {
-                scale = this.outWidth / this.clipRect.width;
+            else if (this.config?.outWidth) {
+                scale = this.config?.outWidth / this.clipRect.width;
             }
-            else if (this.outHeight) {
-                scale = this.outHeight / this.clipRect.height;
+            else if (this.config?.outHeight) {
+                scale = this.config?.outHeight / this.clipRect.height;
             }
         }
         canvas.width = this.clipRect.width * scale;
@@ -397,22 +401,23 @@ class ImageLayout extends Layout {
     }
 }
 class HandleLayout extends Layout {
-    constructor(parent, cursor = "move", config) {
+    constructor(parent, cursor, config) {
         super(parent, cursor, config);
         this.layoutList = [];
         this.isChecked = false;
         this.mousePoint = new Point(0, 0);
         this.onMoveLayout = null;
         this.onEndSelect = null;
-        this.center = new CenterLayout(this, centerIcon, 0, "move", config);
-        this.topLeft = new PointLayout(this, cornerIcon, -90, "nwse-resize", config);
-        this.topCenter = new PointLayout(this, edgeIcon, 0, "ns-resize", config);
-        this.topRight = new PointLayout(this, cornerIcon, 0, "nesw-resize", config);
-        this.centerLeft = new PointLayout(this, edgeIcon, -90, "ew-resize", config);
-        this.centerRight = new PointLayout(this, edgeIcon, 90, "ew-resize", config);
-        this.bottomLeft = new PointLayout(this, cornerIcon, 180, "nesw-resize", config);
-        this.bottomCenter = new PointLayout(this, edgeIcon, 180, "ns-resize", config);
-        this.bottomRight = new PointLayout(this, cornerIcon, 90, "nwse-resize", config);
+        this.center = new CenterLayout(this, centerIcon, 0, handIcon.clone(), config);
+        this.topLeft = new PointLayout(this, cornerIcon, -90, resizeIcon.clone(-45), config);
+        this.topCenter = new PointLayout(this, edgeIcon, 0, resizeIcon.clone(), config);
+        this.topRight = new PointLayout(this, cornerIcon, 0, resizeIcon.clone(45), config);
+        this.centerLeft = new PointLayout(this, edgeIcon, -90, resizeIcon.clone(90), config);
+        this.centerRight = new PointLayout(this, edgeIcon, 90, resizeIcon.clone(90), config);
+        this.bottomLeft = new PointLayout(this, cornerIcon, 180, resizeIcon.clone(45), config);
+        this.bottomCenter = new PointLayout(this, edgeIcon, 180, resizeIcon.clone(), config);
+        this.bottomRight = new PointLayout(this, cornerIcon, 90, resizeIcon.clone(-45), config);
+        this.center.setOnMoveLayout(this.onMoveCenter.bind(this));
         this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this));
         this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this));
         this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this));
@@ -421,6 +426,7 @@ class HandleLayout extends Layout {
         this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this));
         this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this));
         this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this));
+        this.center.setOnEndLayout(this.onEndLayout.bind(this));
         this.topLeft.setOnEndLayout(this.onEndLayout.bind(this));
         this.topCenter.setOnEndLayout(this.onEndLayout.bind(this));
         this.topRight.setOnEndLayout(this.onEndLayout.bind(this));
@@ -450,14 +456,29 @@ class HandleLayout extends Layout {
     setOnEndSelect(callback) {
         this.onEndSelect = callback;
     }
+    onMoveCenter(offset) {
+        const rect = this.rect.clone();
+        rect.left += offset.x;
+        rect.top += offset.y;
+        rect.right += offset.x;
+        rect.bottom += offset.y;
+        this.rect = rect;
+        this.setRect(this.rect);
+    }
     onMoveTopLeft(offset) {
         const rect = this.rect.clone();
         rect.left += offset.x;
         rect.top += offset.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight;
-            const width = this.outWidth * scale;
-            const height = this.outHeight * scale;
+        if (rect.left >= rect.right - minSize) {
+            rect.left = rect.right - minSize;
+        }
+        if (rect.top >= rect.bottom - minSize) {
+            rect.top = rect.bottom - minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight;
+            const width = this.config?.outWidth * scale;
+            const height = this.config?.outHeight * scale;
             rect.left += rect.width - width;
             rect.top += rect.height - height;
         }
@@ -467,12 +488,15 @@ class HandleLayout extends Layout {
     onMoveTopCenter(offset) {
         const rect = this.rect.clone();
         rect.top += offset.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = rect.height / this.outHeight;
-            const width = this.outWidth * scale;
+        if (rect.top >= rect.bottom - minSize) {
+            rect.top = rect.bottom - minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = rect.height / this.config?.outHeight;
+            const width = this.config?.outWidth * scale;
             rect.left += (rect.width - width) / 2;
             rect.right = rect.left + width;
-            rect.bottom = rect.top + this.outHeight * scale;
+            rect.bottom = rect.top + this.config?.outHeight * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -481,10 +505,16 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone();
         rect.right += offset.x;
         rect.top += offset.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight;
-            rect.right = rect.left + this.outWidth * scale;
-            rect.top += rect.height - this.outHeight * scale;
+        if (rect.right <= rect.left + minSize) {
+            rect.right = rect.left + minSize;
+        }
+        if (rect.top >= rect.bottom - minSize) {
+            rect.top = rect.bottom - minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight;
+            rect.right = rect.left + this.config?.outWidth * scale;
+            rect.top += rect.height - this.config?.outHeight * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -492,12 +522,15 @@ class HandleLayout extends Layout {
     onMoveCenterLeft(offset) {
         const rect = this.rect.clone();
         rect.left += offset.x;
-        if (this.outWidth && this.outHeight) {
-            const scale = rect.width / this.outWidth;
-            const height = this.outHeight * scale;
+        if (rect.left >= rect.right - minSize) {
+            rect.left = rect.right - minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = rect.width / this.config?.outWidth;
+            const height = this.config?.outHeight * scale;
             rect.top += (rect.height - height) / 2;
             rect.bottom = rect.top + height;
-            rect.right = rect.left + this.outWidth * scale;
+            rect.right = rect.left + this.config?.outWidth * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -505,12 +538,15 @@ class HandleLayout extends Layout {
     onMoveCenterRight(offset) {
         const rect = this.rect.clone();
         rect.right += offset.x;
-        if (this.outWidth && this.outHeight) {
-            const scale = rect.width / this.outWidth;
-            const height = this.outHeight * scale;
+        if (rect.right <= rect.left + minSize) {
+            rect.right = rect.left + minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = rect.width / this.config?.outWidth;
+            const height = this.config?.outHeight * scale;
             rect.top += (rect.height - height) / 2;
             rect.bottom = rect.top + height;
-            rect.right = rect.left + this.outWidth * scale;
+            rect.right = rect.left + this.config?.outWidth * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -519,10 +555,16 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone();
         rect.left += offset.x;
         rect.bottom += offset.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight;
-            rect.left += (rect.width - this.outWidth * scale);
-            rect.bottom = rect.top + this.outHeight * scale;
+        if (rect.left >= rect.right - minSize) {
+            rect.left = rect.right - minSize;
+        }
+        if (rect.bottom <= rect.top + minSize) {
+            rect.bottom = rect.top + minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight;
+            rect.left += (rect.width - this.config?.outWidth * scale);
+            rect.bottom = rect.top + this.config?.outHeight * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -530,12 +572,15 @@ class HandleLayout extends Layout {
     onMoveBottomCenter(offset) {
         const rect = this.rect.clone();
         rect.bottom += offset.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = rect.height / this.outHeight;
-            const width = this.outWidth * scale;
+        if (rect.bottom <= rect.top + minSize) {
+            rect.bottom = rect.top + minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = rect.height / this.config?.outHeight;
+            const width = this.config?.outWidth * scale;
             rect.left += (rect.width - width) / 2;
             rect.right = rect.left + width;
-            rect.bottom = rect.top + this.outHeight * scale;
+            rect.bottom = rect.top + this.config?.outHeight * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -544,10 +589,16 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone();
         rect.right += offset.x;
         rect.bottom += offset.y;
-        if (this.outWidth && this.outHeight) {
-            const scale = this.outWidth > this.outHeight ? rect.width / this.outWidth : rect.height / this.outHeight;
-            rect.right = rect.left + this.outWidth * scale;
-            rect.bottom = rect.top + this.outHeight * scale;
+        if (rect.right <= rect.left + minSize) {
+            rect.right = rect.left + minSize;
+        }
+        if (rect.bottom <= rect.top + minSize) {
+            rect.bottom = rect.top + minSize;
+        }
+        if (this.config?.outWidth && this.config?.outHeight) {
+            const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight;
+            rect.right = rect.left + this.config?.outWidth * scale;
+            rect.bottom = rect.top + this.config?.outHeight * scale;
         }
         this.rect = rect;
         this.setRect(this.rect);
@@ -594,8 +645,27 @@ class HandleLayout extends Layout {
         this.bottomCenter.setRect(Rect.fromSize(left + width / 2, bottom, diameter, diameter));
         this.bottomRight.setRect(Rect.fromSize(right, bottom, diameter, diameter));
     }
+    drawEllipse(ctx, x, y, w, h) {
+        const kappa = 0.5522848;
+        const ox = (w / 2) * kappa;
+        const oy = (h / 2) * kappa;
+        const xe = x + w;
+        const ye = y + h;
+        const xm = x + w / 2;
+        const ym = y + h / 2;
+        ctx.moveTo(x, ym);
+        ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+        ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+        ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+        ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+    }
     drawMask(ctx) {
-        ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
+        if (this.config.circle) {
+            this.drawEllipse(ctx, this.rect.left, this.rect.top, this.rect.width, this.rect.height);
+        }
+        else {
+            ctx.roundRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height, this.config.circleRadius ?? 0);
+        }
     }
     drawLine(ctx, start, end) {
         ctx.save();
@@ -624,7 +694,12 @@ class HandleLayout extends Layout {
         ctx.strokeStyle = this.config.borderColor2;
         ctx.stroke();
         ctx.beginPath();
-        ctx.rect(left, top, width, height);
+        if (this.config.circle) {
+            this.drawEllipse(ctx, left, top, width, height);
+        }
+        else {
+            ctx.roundRect(left, top, width, height, this.config.circleRadius ?? 0);
+        }
         ctx.closePath();
         ctx.strokeStyle = this.config.borderColor1;
         ctx.stroke();
@@ -636,13 +711,9 @@ class HandleLayout extends Layout {
         this.drawLine(ctx, new Point(left + width * 2, top), new Point(left + width * 2, bottom));
         super.draw(ctx);
     }
-    setOutSize(outWidth, outHeight) {
-        this.outWidth = outWidth;
-        this.outHeight = outHeight;
-    }
 }
 class PointLayout extends Layout {
-    constructor(parent, icon, angle, cursor = "move", config) {
+    constructor(parent, icon, angle, cursor, config) {
         super(parent, cursor, config);
         this.isChecked = false;
         this.mousePoint = new Point(0, 0);
@@ -699,14 +770,14 @@ class CenterLayout extends PointLayout {
     }
 }
 class MaskLayout extends Layout {
-    constructor(parent, cursor = "pointer", config) {
+    constructor(parent, cursor, config) {
         super(parent, cursor, config);
         this.maskColor = '#88888888';
         this.isSelect = true;
         this.isChecked = false;
         this.mousePoint = new Point(0, 0);
         this.onRotateLayout = null;
-        this.handle = new HandleLayout(this, "move", config);
+        this.handle = new HandleLayout(this, moveIcon, config);
         this.layoutList.push(this.handle);
     }
     setOnRotateLayout(callback) {
@@ -733,14 +804,20 @@ class MaskLayout extends Layout {
         if (this.isSelect) {
             return false;
         }
+        const rect = this.handle.getRect();
+        const center = new Point(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        let dx1 = point.x - center.x;
+        let dy1 = point.y - center.y;
+        let dx2 = 0 - center.x;
+        let dy2 = 0 - center.y;
+        let angle = (Math.atan2(dy1, dx1) - Math.atan2(dy2, dx2)) * (180 / Math.PI);
+        this.cursor?.setAngle(-90 + angle);
         if (this.isChecked) {
-            const rect = this.getRect();
-            const center = new Point(rect.left + rect.width / 2, rect.top + rect.height / 2);
-            const dx1 = point.x - center.x;
-            const dy1 = point.y - center.y;
-            const dx2 = this.mousePoint.x - center.x;
-            const dy2 = this.mousePoint.y - center.y;
-            const angle = (Math.atan2(dy2, dx2) - Math.atan2(dy1, dx1)) * (180 / Math.PI);
+            dx1 = point.x - center.x;
+            dy1 = point.y - center.y;
+            dx2 = this.mousePoint.x - center.x;
+            dy2 = this.mousePoint.y - center.y;
+            angle = (Math.atan2(dy2, dx2) - Math.atan2(dy1, dx1)) * (180 / Math.PI);
             this.onRotateLayout?.call(this, angle);
             this.mousePoint = point;
             return true;
@@ -780,49 +857,53 @@ class MaskLayout extends Layout {
         ctx.restore();
         super.draw(ctx);
     }
-    setOutSize(outWidth, outHeight) {
-        this.handle.setOutSize(outWidth, outHeight);
+    getClipRect() {
+        return this.handle.getRect();
     }
 }
 class ImageCropper extends Layout {
     constructor(canvas, config) {
-        super(null, "auto", config);
+        super(null, null, config);
         this.overLayout = null;
         this.layoutList = [];
-        this.outType = OutType.SIZE;
+        this.mouseOver = false;
         this.background = new BackgroundLayout(this, config);
         const { width, height } = canvas.getBoundingClientRect();
+        canvas.style.cursor = "none";
         canvas.width = width;
         canvas.height = height;
         this.canvas = canvas;
         this.canvas2D = canvas.getContext('2d');
         this.setRect(new Rect(0, 0, this.canvas.width, this.canvas.height));
         this.initBackground();
+        this.initClipRect(config?.defaultClipRect);
         canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
         canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
         canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
         canvas.addEventListener('wheel', this.onMouseWheel.bind(this));
+        canvas.addEventListener('mouseover', this.onMouseOver.bind(this));
+        canvas.addEventListener('mouseout', this.onMouseOut.bind(this));
         canvas.addEventListener('touchstart', this.onTouchStart.bind(this));
         canvas.addEventListener('touchmove', this.onTouchMove.bind(this));
         canvas.addEventListener('touchend', this.onTouchEnd.bind(this));
         this.draw(this.canvas2D);
     }
     setCursor(cursor) {
-        this.canvas.style.cursor = cursor;
+        this.drawCursor = cursor;
     }
     start(point) {
-        super.start(point);
+        super.start(this.mousePoint = point);
         this.draw(this.canvas2D);
         return true;
     }
     move(point) {
         this.checkOverOut(point);
-        super.move(point);
+        super.move(this.mousePoint = point);
         this.draw(this.canvas2D);
         return true;
     }
     end(point) {
-        super.end(point);
+        super.end(this.mousePoint = point);
         this.draw(this.canvas2D);
         return true;
     }
@@ -846,7 +927,7 @@ class ImageCropper extends Layout {
     }
     onMouseDown(event) {
         event.preventDefault();
-        this.start(new Point(event.offsetX, event.offsetY));
+        this.start(this.mousePoint = new Point(event.offsetX, event.offsetY));
     }
     onMouseMove(event) {
         event.preventDefault();
@@ -857,8 +938,12 @@ class ImageCropper extends Layout {
         this.end(new Point(event.offsetX, event.offsetY));
     }
     onMouseOver(event) {
-        event.preventDefault();
-        this.over();
+        this.mouseOver = true;
+        this.draw(this.canvas2D);
+    }
+    onMouseOut(event) {
+        this.mouseOver = false;
+        this.draw(this.canvas2D);
     }
     onMouseWheel(event) {
         event.preventDefault();
@@ -866,11 +951,15 @@ class ImageCropper extends Layout {
         this.draw(this.canvas2D);
     }
     setImage(image) {
-        this.image = new ImageLayout(this);
+        this.image = new ImageLayout(this, null, this.config);
         this.image.setRect(this.rect.clone());
         this.image.setImage(image);
-        this.image.setOutSize(this.outWidth, this.outHeight, this.outType);
-        this.layoutList.push(this.image);
+        if (this.mask) {
+            const rect = this.mask.getClipRect().clone();
+            this.image?.setClipRect(rect);
+            this.image.initScale(rect);
+        }
+        this.layoutList.splice(1, 0, this.image);
         this.draw(this.canvas2D);
     }
     setOverLayout(layout) {
@@ -905,20 +994,7 @@ class ImageCropper extends Layout {
             if (this.mask) {
                 return;
             }
-            this.mask = new MaskLayout(this, `url(${rotatingCursor}), auto`, this.config);
-            this.mask.setOutSize(this.outWidth, this.outHeight);
-            this.mask.setOnMoveLayout((offset) => {
-                this.image?.moveImage(offset);
-            });
-            this.mask.setOnRotateLayout((angle) => {
-                this.image?.setRotate(angle);
-            });
-            this.mask.setOnEndSelect((rect) => {
-                this.image?.setClipRect(rect.clone());
-            });
-            this.mask.setRect(this.rect);
-            this.mask.setHandleRect(rect.clone());
-            this.layoutList.push(this.mask);
+            this.createMask(rect.clone());
         });
         this.background.setOnMoveSelect((rect) => {
             this.mask?.setHandleRect(rect.clone());
@@ -931,16 +1007,62 @@ class ImageCropper extends Layout {
     reset() {
         this.mask?.remove();
         this.mask = undefined;
+        this.initClipRect(this.config?.defaultClipRect);
         this.image?.reset();
         this.draw(this.canvas2D);
     }
-    setOutSize(width, height, type = OutType.SIZE) {
-        this.outWidth = width;
-        this.outHeight = height;
-        this.outType = type;
-        this.background?.setOutSize(width, height);
-        this.image?.setOutSize(width, height, type);
-        this.mask?.setOutSize(width, height);
+    initClipRect(padding) {
+        if (padding) {
+            const rect = new Rect(padding.left, padding.top, this.rect.right - padding.right, this.rect.bottom - padding.bottom);
+            if (this.config?.outWidth && this.config?.outHeight) {
+                const scale = Math.min(rect.width / this.config?.outWidth, rect.height / this.config?.outHeight);
+                const width = this.config?.outWidth * scale;
+                const height = this.config?.outHeight * scale;
+                rect.left = (this.rect.width - width) / 2;
+                rect.top = (this.rect.height - height) / 2;
+                rect.right = rect.left + width;
+                rect.bottom = rect.top + height;
+            }
+            else if (this.config?.outWidth) {
+                const scale = rect.width / this.config?.outWidth;
+                const width = this.config?.outWidth * scale;
+                rect.left = (this.rect.width - width) / 2;
+                rect.right = rect.left + width;
+            }
+            else if (this.config?.outHeight) {
+                const scale = rect.height / this.config?.outHeight;
+                const height = this.config?.outHeight * scale;
+                rect.top = (this.rect.height - height) / 2;
+                rect.bottom = rect.top + height;
+            }
+            this.image?.setClipRect(rect.clone());
+            this.createMask(rect);
+            this.mask?.endSelect(rect);
+        }
+    }
+    createMask(rect) {
+        this.mask = new MaskLayout(this, rotateIcon, this.config);
+        this.mask.setOnMoveLayout((offset) => {
+            this.image?.moveImage(offset);
+        });
+        this.mask.setOnRotateLayout((angle) => {
+            this.image?.setRotate(angle);
+        });
+        this.mask.setOnEndSelect((rect) => {
+            this.image?.setClipRect(rect.clone());
+        });
+        this.mask.setRect(this.rect);
+        this.mask.setHandleRect(rect);
+        this.layoutList.push(this.mask);
+    }
+    draw(ctx) {
+        super.draw(ctx);
+        if (this.mousePoint && this.drawCursor && this.mouseOver) {
+            ctx.save();
+            ctx.translate(this.mousePoint.x - 9, this.mousePoint.y - 9);
+            this.drawCursor.draw(ctx, 18, 18, this.config.borderColor2, this.config.borderColor1, this.config.borderWidth + 1);
+            ctx.restore();
+        }
     }
 }
 export default ImageCropper;

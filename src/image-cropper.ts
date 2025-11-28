@@ -141,6 +141,8 @@ interface ImageCropperOption {
     outType?: OutType
     outWidth?: number | null
     outHeight?: number | null
+    circle?: boolean
+    circleRadius?: number
 }
 
 class Point {
@@ -394,21 +396,25 @@ class ImageLayout extends Layout {
     protected clipRect: Rect = new Rect(0, 0, 0, 0)
     protected offset: Point = new Point(0, 0);
 
-    constructor(parent: Layout | null, cursor?: Svg | null) {
-        super(parent, cursor);
+    constructor(parent: Layout | null, cursor?: Svg | null, config?: ImageCropperOption) {
+        super(parent, cursor, config);
     }
 
-    public setScale(scale: number): void {
-        this.scale = scale
+    public initScale(rect: Rect): void {
+        if (this.image) {
+            this.scale = Math.max(rect.width / this.image!.width, rect.height / this.image!.height)
+        }
     }
 
     public reset(): void {
         this.angle = 0;
         this.offset = new Point(0, 0);
-        this.clipRect = new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom)
-        const scaleX = this.rect.width / this.image!.width;
-        const scaleY = this.rect.height / this.image!.height;
-        this.scale = Math.min(scaleX, scaleY)
+        if (this.config.defaultClipRect) {
+            this.scale = Math.max(this.clipRect.width / this.image!.width, this.clipRect.height / this.image!.height)
+        } else {
+            this.clipRect = new Rect(this.rect.left, this.rect.top, this.rect.right, this.rect.bottom)
+            this.scale = Math.min(this.rect.width / this.image!.width, this.rect.height / this.image!.height)
+        }
     }
 
     public setRect(rect: Rect): void {
@@ -826,8 +832,28 @@ class HandleLayout extends Layout {
         this.bottomRight.setRect(Rect.fromSize(right, bottom, diameter, diameter))
     }
 
+    protected drawEllipse(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+        const kappa = 0.5522848;
+        const ox = (w / 2) * kappa;
+        const oy = (h / 2) * kappa;
+        const xe = x + w;
+        const ye = y + h;
+        const xm = x + w / 2;
+        const ym = y + h / 2;
+
+        ctx.moveTo(x, ym);
+        ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+        ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+        ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+        ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+    }
     public drawMask(ctx: CanvasRenderingContext2D): void {
-        ctx.rect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
+        if (this.config.circle) {
+            this.drawEllipse(ctx, this.rect.left, this.rect.top, this.rect.width, this.rect.height)
+        } else {
+            ctx.roundRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height, this.config.circleRadius ?? 0)
+        }
+
     }
 
     private drawLine(ctx: CanvasRenderingContext2D, start: Point, end: Point): void {
@@ -864,7 +890,11 @@ class HandleLayout extends Layout {
         ctx.stroke()
 
         ctx.beginPath()
-        ctx.rect(left, top, width, height)
+        if (this.config.circle) {
+            this.drawEllipse(ctx, left, top, width, height)
+        } else {
+            ctx.roundRect(left, top, width, height, this.config.circleRadius ?? 0)
+        }
         ctx.closePath()
         ctx.strokeStyle = this.config.borderColor1!;
         ctx.stroke()
@@ -1197,14 +1227,13 @@ class ImageCropper extends Layout implements Root {
     }
 
     public setImage(image: HTMLImageElement): void {
-        this.image = new ImageLayout(this, null)
+        this.image = new ImageLayout(this, null, this.config)
         this.image.setRect(this.rect.clone())
         this.image.setImage(image)
         if (this.mask) {
             const rect = this.mask.getClipRect().clone()
             this.image?.setClipRect(rect)
-            let scale = Math.max(rect.width / image.width, rect.height / image.height)
-            this.image.setScale(scale)
+            this.image.initScale(rect)
         }
         this.layoutList.splice(1, 0, this.image)
 
@@ -1264,7 +1293,6 @@ class ImageCropper extends Layout implements Root {
         this.image?.reset()
         this.draw(this.canvas2D)
     }
-
 
     protected initClipRect(padding?: Rect | null): void {
         if (padding) {
