@@ -1,4 +1,4 @@
-const rotatingCursor: string = 'data:image/svg+xml;base64,PHN2ZyB0PSIxNzYzMzA4NTgxNTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1NzAiCiAgICAgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICAgIDxwYXRoIGQ9Ik00MjEuMTIgNTkwLjUwNjY2N0wzNjIuNjY2NjY3IDY0OC41MzMzMzNhMzI5LjM4NjY2NyAzMjkuMzg2NjY3IDAgMCAxIDIzLjQ2NjY2Ni00MDkuMTczMzMzIDguNTMzMzMzIDguNTMzMzMzIDAgMCAwLTkuODEzMzMzLTEzLjIyNjY2NyAzMTAuMTg2NjY3IDMxMC4xODY2NjcgMCAwIDAtODMuMiA0OTIuMzczMzM0TDI0MS45MiA3NjhhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMCAxMS45NDY2NjcgMjkuMDEzMzMzaDE3OS4yYTE3LjA2NjY2NiAxNy4wNjY2NjcgMCAwIDAgMTcuMDY2NjY2LTE3LjA2NjY2NnYtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0yOS4wMTMzMzMtMTAuMjR6TTYwMi44OCA0MzMuNDkzMzMzTDY2MS4zMzMzMzMgMzc1LjQ2NjY2N2EzMjkuMzg2NjY3IDMyOS4zODY2NjcgMCAwIDEtMjEuMzMzMzMzIDQwOS4xNzMzMzMgOC41MzMzMzMgOC41MzMzMzMgMCAwIDAgOS44MTMzMzMgMTMuMjI2NjY3IDMxMC4xODY2NjcgMzEwLjE4NjY2NyAwIDAgMCA4MS4wNjY2NjctNDkyLjM3MzMzNEw3ODIuMDggMjU2YTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAtMTEuOTQ2NjY3LTI5LjAxMzMzM2gtMTc5LjJhMTcuMDY2NjY3IDE3LjA2NjY2NyAwIDAgMC0xNy4wNjY2NjYgMTcuMDY2NjY2djE3OS4yYTE3LjA2NjY2NyAxNy4wNjY2NjcgMCAwIDAgMjkuMDEzMzMzIDEwLjI0eiIKICAgICAgICAgIHAtaWQ9IjE1NzEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiPjwvcGF0aD4KPC9zdmc+';
+const minSize: number = 12
 
 enum OutType {
     SIZE,
@@ -398,6 +398,10 @@ class ImageLayout extends Layout {
         super(parent, cursor);
     }
 
+    public setScale(scale: number): void {
+        this.scale = scale
+    }
+
     public reset(): void {
         this.angle = 0;
         this.offset = new Point(0, 0);
@@ -632,6 +636,13 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone()
         rect.left += offset.x
         rect.top += offset.y
+        if (rect.left >= rect.right - minSize) {
+            rect.left = rect.right - minSize
+        }
+        if (rect.top >= rect.bottom - minSize) {
+            rect.top = rect.bottom - minSize
+        }
+
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight
             const width = this.config?.outWidth * scale
@@ -646,6 +657,9 @@ class HandleLayout extends Layout {
     protected onMoveTopCenter(offset: Point): void {
         const rect = this.rect.clone()
         rect.top += offset.y
+        if (rect.top >= rect.bottom - minSize) {
+            rect.top = rect.bottom - minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = rect.height / this.config?.outHeight
             const width = this.config?.outWidth * scale
@@ -661,6 +675,12 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone()
         rect.right += offset.x
         rect.top += offset.y
+        if (rect.right <= rect.left + minSize) {
+            rect.right = rect.left + minSize
+        }
+        if (rect.top >= rect.bottom - minSize) {
+            rect.top = rect.bottom - minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight
             rect.right = rect.left + this.config?.outWidth * scale
@@ -673,6 +693,9 @@ class HandleLayout extends Layout {
     protected onMoveCenterLeft(offset: Point): void {
         const rect = this.rect.clone()
         rect.left += offset.x
+        if (rect.left >= rect.right - minSize) {
+            rect.left = rect.right - minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = rect.width / this.config?.outWidth
             const height = this.config?.outHeight * scale
@@ -687,6 +710,9 @@ class HandleLayout extends Layout {
     protected onMoveCenterRight(offset: Point): void {
         const rect = this.rect.clone()
         rect.right += offset.x
+        if (rect.right <= rect.left + minSize) {
+            rect.right = rect.left + minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = rect.width / this.config?.outWidth
             const height = this.config?.outHeight * scale
@@ -702,6 +728,12 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone()
         rect.left += offset.x
         rect.bottom += offset.y
+        if (rect.left >= rect.right - minSize) {
+            rect.left = rect.right - minSize
+        }
+        if (rect.bottom <= rect.top + minSize) {
+            rect.bottom = rect.top + minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight
             rect.left += (rect.width - this.config?.outWidth * scale)
@@ -714,6 +746,9 @@ class HandleLayout extends Layout {
     protected onMoveBottomCenter(offset: Point): void {
         const rect = this.rect.clone()
         rect.bottom += offset.y
+        if (rect.bottom <= rect.top + minSize) {
+            rect.bottom = rect.top + minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = rect.height / this.config?.outHeight
             const width = this.config?.outWidth * scale
@@ -729,6 +764,12 @@ class HandleLayout extends Layout {
         const rect = this.rect.clone()
         rect.right += offset.x
         rect.bottom += offset.y
+        if (rect.right <= rect.left + minSize) {
+            rect.right = rect.left + minSize
+        }
+        if (rect.bottom <= rect.top + minSize) {
+            rect.bottom = rect.top + minSize
+        }
         if (this.config?.outWidth && this.config?.outHeight) {
             const scale = this.config?.outWidth > this.config?.outHeight ? rect.width / this.config?.outWidth : rect.height / this.config?.outHeight
             rect.right = rect.left + this.config?.outWidth * scale
@@ -968,7 +1009,7 @@ class MaskLayout extends Layout {
         if (this.isSelect) {
             return false
         }
-        const rect = this.getRect()
+        const rect = this.handle.getRect()
         const center = new Point(rect.left + rect.width / 2, rect.top + rect.height / 2)
 
         let dx1 = point.x - center.x;
@@ -979,7 +1020,6 @@ class MaskLayout extends Layout {
         this.cursor?.setAngle(-90 + angle)
 
         if (this.isChecked) {
-
             dx1 = point.x - center.x;
             dy1 = point.y - center.y;
             dx2 = this.mousePoint.x - center.x;
@@ -1161,7 +1201,10 @@ class ImageCropper extends Layout implements Root {
         this.image.setRect(this.rect.clone())
         this.image.setImage(image)
         if (this.mask) {
-            this.image?.setClipRect(this.mask.getClipRect().clone())
+            const rect = this.mask.getClipRect().clone()
+            this.image?.setClipRect(rect)
+            let scale = Math.max(rect.width / image.width, rect.height / image.height)
+            this.image.setScale(scale)
         }
         this.layoutList.splice(1, 0, this.image)
 
