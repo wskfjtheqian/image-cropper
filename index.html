@@ -29,13 +29,15 @@
         // borderWidth: 1,
         // borderColor1: 'rgb(255,0,0)',
         // borderColor2: 'rgba(0,59,255,0.53)',
+        // outWidth: 300,
+        outHeight: 300,
+        defaultClipRect: {left: 100, top: 100, right: 100, bottom: 100},
     });
 
 
     const image = new Image();
     image.crossOrigin = "anonymous"; // 必须在 src 之前设置
     image.src = 'https://img-s.msn.cn/tenant/amp/entityid/AA1HWO7G.img';
-    cropper.setOutSize(800, 600, 1)
     image.onload = () => {
         cropper.setImage(image)
     }

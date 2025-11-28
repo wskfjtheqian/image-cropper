@@ -4,6 +4,7 @@ import {resolve} from 'path';
 export default defineConfig({
     root: '.', // 项目根
     server: {
+        host: '0.0.0.0',
         port: 5173
     },
     build: {
