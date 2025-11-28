@@ -26,7 +26,7 @@ class g {
     t.strokeStyle = s, t.lineWidth = Math.max(1, c / v), t.stroke(R), h && (t.fillStyle = h, t.fill(R)), t.restore();
   }
 }
-const C = new g(
+const S = new g(
   24,
   24,
   [0, 0, 24, 24],
@@ -47,7 +47,7 @@ const C = new g(
   24,
   [0, 0, 24, 24],
   ["M13.7,12L13.7,12l0-7.3H17L12,0.1L6.9,4.7h3.3v14.5H6.8l5.1,4.7l5.1-4.7h-3.3V12z"]
-), S = new g(
+), C = new g(
   24,
   24,
   [0, 0, 24, 24],
@@ -111,7 +111,11 @@ class L {
       borderWidth: 1.5,
       borderColor1: "#000000",
       borderColor2: "#ffffff",
-      pointRadius: 12
+      pointRadius: 12,
+      cursorStrokeLineWidth: 2,
+      cursorStrokeColor: "#ffffff",
+      cursorColor: "#000000",
+      cursorSize: 18
     }, this.parent = t, this.cursor = e, Object.assign(this.config, i);
   }
   setRect(t) {
@@ -294,7 +298,7 @@ class E extends L {
 }
 class W extends L {
   constructor(t, e, i) {
-    super(t, e, i), this.layoutList = [], this.isChecked = !1, this.mousePoint = new r(0, 0), this.onMoveLayout = null, this.onEndSelect = null, this.center = new B(this, C, 0, z.clone(), i), this.topLeft = new m(this, b, -90, p.clone(-45), i), this.topCenter = new m(this, y, 0, p.clone(), i), this.topRight = new m(this, b, 0, p.clone(45), i), this.centerLeft = new m(this, y, -90, p.clone(90), i), this.centerRight = new m(this, y, 90, p.clone(90), i), this.bottomLeft = new m(this, b, 180, p.clone(45), i), this.bottomCenter = new m(this, y, 180, p.clone(), i), this.bottomRight = new m(this, b, 90, p.clone(-45), i), this.center.setOnMoveLayout(this.onMoveCenter.bind(this)), this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this)), this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this)), this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this)), this.centerLeft.setOnMoveLayout(this.onMoveCenterLeft.bind(this)), this.centerRight.setOnMoveLayout(this.onMoveCenterRight.bind(this)), this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this)), this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this)), this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this)), this.center.setOnEndLayout(this.onEndLayout.bind(this)), this.topLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.topCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.topRight.setOnEndLayout(this.onEndLayout.bind(this)), this.centerLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.centerRight.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomRight.setOnEndLayout(this.onEndLayout.bind(this)), this.layoutList = [
+    super(t, e, i), this.layoutList = [], this.isChecked = !1, this.mousePoint = new r(0, 0), this.onMoveLayout = null, this.onEndSelect = null, this.center = new B(this, S, 0, z.clone(), i), this.topLeft = new m(this, b, -90, p.clone(-45), i), this.topCenter = new m(this, y, 0, p.clone(), i), this.topRight = new m(this, b, 0, p.clone(45), i), this.centerLeft = new m(this, y, -90, p.clone(90), i), this.centerRight = new m(this, y, 90, p.clone(90), i), this.bottomLeft = new m(this, b, 180, p.clone(45), i), this.bottomCenter = new m(this, y, 180, p.clone(), i), this.bottomRight = new m(this, b, 90, p.clone(-45), i), this.center.setOnMoveLayout(this.onMoveCenter.bind(this)), this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this)), this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this)), this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this)), this.centerLeft.setOnMoveLayout(this.onMoveCenterLeft.bind(this)), this.centerRight.setOnMoveLayout(this.onMoveCenterRight.bind(this)), this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this)), this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this)), this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this)), this.center.setOnEndLayout(this.onEndLayout.bind(this)), this.topLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.topCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.topRight.setOnEndLayout(this.onEndLayout.bind(this)), this.centerLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.centerRight.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomRight.setOnEndLayout(this.onEndLayout.bind(this)), this.layoutList = [
       this.topLeft,
       this.topCenter,
       this.topRight,
@@ -481,7 +485,7 @@ class D extends L {
       return !1;
     const e = this.handle.getRect(), i = new r(e.left + e.width / 2, e.top + e.height / 2);
     let s = t.x - i.x, h = t.y - i.y, c = 0 - i.x, n = 0 - i.y, o = (Math.atan2(h, s) - Math.atan2(n, c)) * (180 / Math.PI);
-    return this.cursor?.setAngle(-90 + o), this.isChecked ? (s = t.x - i.x, h = t.y - i.y, c = this.mousePoint.x - i.x, n = this.mousePoint.y - i.y, o = (Math.atan2(n, c) - Math.atan2(h, s)) * (180 / Math.PI), this.onRotateLayout?.call(this, o), this.mousePoint = t, !0) : (super.move(t), !0);
+    return this.cursor?.setAngle(-100 + o), this.isChecked ? (s = t.x - i.x, h = t.y - i.y, c = this.mousePoint.x - i.x, n = this.mousePoint.y - i.y, o = (Math.atan2(n, c) - Math.atan2(h, s)) * (180 / Math.PI), this.onRotateLayout?.call(this, o), this.mousePoint = t, !0) : (super.move(t), !0);
   }
   end(t) {
     return this.isSelect ? !1 : (this.isChecked = !1, super.end(t), !0);
@@ -598,7 +602,7 @@ class I extends L {
     }
   }
   createMask(t) {
-    this.mask = new D(this, S, this.config), this.mask.setOnMoveLayout((e) => {
+    this.mask = new D(this, C, this.config), this.mask.setOnMoveLayout((e) => {
       this.image?.moveImage(e);
     }), this.mask.setOnRotateLayout((e) => {
       this.image?.setRotate(e);
@@ -607,7 +611,14 @@ class I extends L {
     }), this.mask.setRect(this.rect), this.mask.setHandleRect(t), this.layoutList.push(this.mask);
   }
   draw(t) {
-    super.draw(t), this.mousePoint && this.drawCursor && this.mouseOver && (t.save(), t.translate(this.mousePoint.x - 9, this.mousePoint.y - 9), this.drawCursor.draw(t, 18, 18, this.config.borderColor2, this.config.borderColor1, this.config.borderWidth + 1), t.restore());
+    super.draw(t), this.mousePoint && this.drawCursor && this.mouseOver && (t.save(), t.translate(this.mousePoint.x - 9, this.mousePoint.y - 9), this.drawCursor.draw(
+      t,
+      this.config.cursorSize,
+      this.config.cursorSize,
+      this.config.cursorStrokeColor,
+      this.config.cursorColor,
+      this.config.cursorStrokeLineWidth
+    ), t.restore());
   }
 }
 export {

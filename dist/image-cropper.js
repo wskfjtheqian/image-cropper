@@ -127,6 +127,10 @@ class Layout {
             borderColor1: '#000000',
             borderColor2: '#ffffff',
             pointRadius: 12,
+            cursorStrokeLineWidth: 2,
+            cursorStrokeColor: '#ffffff',
+            cursorColor: '#000000',
+            cursorSize: 18,
         };
         this.parent = parent;
         this.cursor = cursor;
@@ -811,7 +815,7 @@ class MaskLayout extends Layout {
         let dx2 = 0 - center.x;
         let dy2 = 0 - center.y;
         let angle = (Math.atan2(dy1, dx1) - Math.atan2(dy2, dx2)) * (180 / Math.PI);
-        this.cursor?.setAngle(-90 + angle);
+        this.cursor?.setAngle(-100 + angle);
         if (this.isChecked) {
             dx1 = point.x - center.x;
             dy1 = point.y - center.y;
@@ -1060,7 +1064,7 @@ class ImageCropper extends Layout {
         if (this.mousePoint && this.drawCursor && this.mouseOver) {
             ctx.save();
             ctx.translate(this.mousePoint.x - 9, this.mousePoint.y - 9);
-            this.drawCursor.draw(ctx, 18, 18, this.config.borderColor2, this.config.borderColor1, this.config.borderWidth + 1);
+            this.drawCursor.draw(ctx, this.config.cursorSize, this.config.cursorSize, this.config.cursorStrokeColor, this.config.cursorColor, this.config.cursorStrokeLineWidth);
             ctx.restore();
         }
     }

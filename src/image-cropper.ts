@@ -1126,9 +1126,9 @@ class ImageCropper extends Layout implements Root {
     protected image?: ImageLayout
     protected overLayout: Layout | null = null;
     protected layoutList: Layout[] = []
-    private mousePoint?: Point;
-    private drawCursor?: Svg | null;
-    private mouseOver: boolean = false;
+    protected mousePoint?: Point;
+    protected drawCursor?: Svg | null;
+    protected mouseOver: boolean = false;
 
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
         super(null, null, config)
@@ -1276,7 +1276,7 @@ class ImageCropper extends Layout implements Root {
         return this.image.toBlob(type, quality)
     }
 
-    private initBackground() {
+    protected initBackground() {
         this.background.setRect(this.rect)
         this.layoutList.push(this.background)
         this.background.setOnStartSelect((rect: Rect) => {

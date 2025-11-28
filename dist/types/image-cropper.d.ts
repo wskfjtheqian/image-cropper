@@ -15,6 +15,10 @@ declare class Svg {
     draw(ctx: CanvasRenderingContext2D, drawWidth: number, drawHeight: number, strokeStyle?: string, fillStyle?: string, strokeWidth?: number): void;
 }
 interface ImageCropperOption {
+    cursorStrokeLineWidth?: number;
+    cursorStrokeColor?: string;
+    cursorColor?: string;
+    cursorSize?: number;
     pointRadius?: number;
     borderWidth?: number;
     borderColor1?: string;
@@ -35,12 +39,7 @@ interface ImageCropperOption {
     outWidth?: number | null;
     outHeight?: number | null;
     circle?: boolean;
-    rectRadius?: number;
-    cursorColor?: string;
-    cursorSize?: number;
-    cursorSockerSize?: number;
-    cursorSockerColor?: string;
-    cursorSockerLineWidth?: number;
+    circleRadius?: number;
 }
 declare class Point {
     x: number;
@@ -207,9 +206,9 @@ declare class ImageCropper extends Layout implements Root {
     protected image?: ImageLayout;
     protected overLayout: Layout | null;
     protected layoutList: Layout[];
-    private mousePoint?;
-    private drawCursor?;
-    private mouseOver;
+    protected mousePoint?: Point;
+    protected drawCursor?: Svg | null;
+    protected mouseOver: boolean;
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption);
     setCursor(cursor?: Svg | null): void;
     start(point: Point): boolean;
@@ -228,7 +227,7 @@ declare class ImageCropper extends Layout implements Root {
     setOverLayout(layout: Layout): void;
     toDataUrl(type?: string, quality?: any): Promise<string>;
     toBlob(type?: string, quality?: any): Promise<Blob | null>;
-    private initBackground;
+    protected initBackground(): void;
     reset(): void;
     protected initClipRect(padding?: Rect | null): void;
     protected createMask(rect: Rect): void;
