@@ -404,8 +404,8 @@ class ImageLayout extends Layout {
     protected clipRect: Rect = new Rect(0, 0, 0, 0)
     protected offset: Point = new Point(0, 0);
 
-    constructor(parent: Layout | null, cursor?: Svg | null, config?: ImageCropperOption) {
-        super(parent, cursor, config);
+    constructor(parent: Layout | null, config?: ImageCropperOption) {
+        super(parent, null, config);
     }
 
     public initScale(rect: Rect): void {
@@ -439,6 +439,9 @@ class ImageLayout extends Layout {
         this.clipRect = rect
     }
 
+    checkOverOut(point: Point): boolean {
+        return false
+    }
 
     public setImage(image: HTMLImageElement): void {
         this.image = image
@@ -1181,7 +1184,7 @@ class ImageCropper extends Layout implements Root {
         return true
     }
 
-    protected onTouchStart(event: TouchEvent) {
+    protected onTouchStart(event: TouchEvent): void {
         event.preventDefault()
         if (event.touches.length === 0) {
             return
@@ -1189,7 +1192,7 @@ class ImageCropper extends Layout implements Root {
         this.start(new Point(event.touches[0]!.clientX, event.touches[0]!.clientY))
     }
 
-    protected onTouchMove(event: TouchEvent) {
+    protected onTouchMove(event: TouchEvent): void {
         event.preventDefault()
 
         if (event.touches.length === 0) {
@@ -1198,44 +1201,45 @@ class ImageCropper extends Layout implements Root {
         this.move(new Point(event.touches[0]!.clientX, event.touches[0]!.clientY))
     }
 
-    protected onTouchEnd(event: TouchEvent) {
+    protected onTouchEnd(event: TouchEvent): void {
         event.preventDefault()
         this.end(new Point(event.changedTouches[0]!.clientX, event.changedTouches[0]!.clientY))
     }
 
-    protected onMouseDown(event: MouseEvent) {
+    protected onMouseDown(event: MouseEvent): void {
         event.preventDefault()
         this.start(this.mousePoint = new Point(event.offsetX, event.offsetY))
     }
 
-    protected onMouseMove(event: MouseEvent) {
+    protected onMouseMove(event: MouseEvent): void {
         event.preventDefault()
         this.move(new Point(event.offsetX, event.offsetY))
     }
 
-    protected onMouseUp(event: MouseEvent) {
+    protected onMouseUp(event: MouseEvent): void {
         event.preventDefault()
         this.end(new Point(event.offsetX, event.offsetY))
     }
 
-    public onMouseOver(event: MouseEvent) {
+    public onMouseOver(event: MouseEvent): void {
+        this.move(new Point(event.offsetX, event.offsetY))
         this.mouseOver = true
         this.draw(this.canvas2D)
     }
 
-    public onMouseOut(event: MouseEvent) {
+    public onMouseOut(event: MouseEvent): void {
         this.mouseOver = false
         this.draw(this.canvas2D)
     }
 
-    protected onMouseWheel(event: WheelEvent) {
+    protected onMouseWheel(event: WheelEvent): void {
         event.preventDefault()
         this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaZ))
         this.draw(this.canvas2D)
     }
 
     public setImage(image: HTMLImageElement): void {
-        this.image = new ImageLayout(this, null, this.config)
+        this.image = new ImageLayout(this, this.config)
         this.image.setRect(this.rect.clone())
         this.image.setImage(image)
         if (this.mask) {
@@ -1355,13 +1359,14 @@ class ImageCropper extends Layout implements Root {
         super.draw(ctx)
         if (this.mousePoint && this.drawCursor && this.mouseOver) {
             ctx.save()
-            ctx.translate(this.mousePoint.x - 9, this.mousePoint.y - 9)
+            ctx.translate(this.mousePoint.x - this.config.cursorSize! / 2, this.mousePoint.y - this.config.cursorSize! / 2)
             this.drawCursor.draw(ctx,
                 this.config.cursorSize!,
                 this.config.cursorSize!,
                 this.config.cursorStrokeColor!,
                 this.config.cursorColor!,
-                this.config.cursorStrokeLineWidth!)
+                this.config.cursorStrokeLineWidth!
+            )
             ctx.restore()
         }
     }
