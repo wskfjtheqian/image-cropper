@@ -45,7 +45,7 @@
         cropper.setImage(image)
     }
 
-    setInterval(() => {
+    function preview() {
         cropper.toDataUrl().then((url) => {
             const preview = document.getElementById('image-preview')
             preview.src = url
@@ -59,9 +59,13 @@
                 裁剪尺寸：${img.width} x ${img.height}<br>
             `
             }
-
+        }).catch((error) => {
         })
-    }, 33.3333)
+        requestAnimationFrame(preview)
+    }
+
+    requestAnimationFrame(preview)
+
 
     document.getElementById('reset-button').addEventListener('click', () => {
         cropper.reset()

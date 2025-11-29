@@ -1132,6 +1132,8 @@ class ImageCropper extends Layout implements Root {
     protected mousePoint?: Point;
     protected drawCursor?: Svg | null;
     protected mouseOver: boolean = false;
+    private dirty = true;
+    private time: DOMHighResTimeStamp = 0;
 
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption) {
         super(null, null, config)
@@ -1158,7 +1160,8 @@ class ImageCropper extends Layout implements Root {
         canvas.addEventListener('touchmove', this.onTouchMove.bind(this))
         canvas.addEventListener('touchend', this.onTouchEnd.bind(this))
 
-        this.draw(this.canvas2D)
+        requestAnimationFrame(this.drawLoop.bind(this))
+        this.markDirty()
     }
 
     public setCursor(cursor?: Svg | null): void {
@@ -1167,20 +1170,20 @@ class ImageCropper extends Layout implements Root {
 
     public start(point: Point): boolean {
         super.start(this.mousePoint = point)
-        this.draw(this.canvas2D)
+        this.markDirty()
         return true
     }
 
     public move(point: Point): boolean {
         this.checkOverOut(point)
         super.move(this.mousePoint = point)
-        this.draw(this.canvas2D)
+        this.markDirty()
         return true
     }
 
     public end(point: Point): boolean {
         super.end(this.mousePoint = point)
-        this.draw(this.canvas2D)
+        this.markDirty()
         return true
     }
 
@@ -1224,18 +1227,18 @@ class ImageCropper extends Layout implements Root {
     public onMouseOver(event: MouseEvent): void {
         this.move(new Point(event.offsetX, event.offsetY))
         this.mouseOver = true
-        this.draw(this.canvas2D)
+        this.markDirty()
     }
 
     public onMouseOut(event: MouseEvent): void {
         this.mouseOver = false
-        this.draw(this.canvas2D)
+        this.markDirty()
     }
 
     protected onMouseWheel(event: WheelEvent): void {
         event.preventDefault()
         this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaZ))
-        this.draw(this.canvas2D)
+        this.markDirty()
     }
 
     public setImage(image: HTMLImageElement): void {
@@ -1249,7 +1252,7 @@ class ImageCropper extends Layout implements Root {
         }
         this.layoutList.splice(1, 0, this.image)
 
-        this.draw(this.canvas2D)
+        this.markDirty()
     }
 
     public setOverLayout(layout: Layout): void {
@@ -1303,7 +1306,7 @@ class ImageCropper extends Layout implements Root {
         this.mask = undefined
         this.initClipRect(this.config?.defaultClipRect)
         this.image?.reset()
-        this.draw(this.canvas2D)
+        this.markDirty()
     }
 
     protected initClipRect(padding?: Rect | null): void {
@@ -1370,6 +1373,104 @@ class ImageCropper extends Layout implements Root {
             ctx.restore()
         }
     }
+
+    protected markDirty(): void {
+        this.dirty = true;
+    }
+
+    protected drawLoop(time: DOMHighResTimeStamp) {
+        if (this.dirty) {
+            this.draw(this.canvas2D)
+            this.dirty = false;
+        }
+        this.dirty = AnimationManager.getInstance().update(time - this.time)
+        this.time = time
+        requestAnimationFrame(this.drawLoop.bind(this))
+    }
 }
+
+//动画管理器
+class AnimationManager {
+    private animations: Animation[] = []
+
+    private static instance: AnimationManager | null = null
+
+    public static getInstance(): AnimationManager {
+        return AnimationManager.instance ?? (AnimationManager.instance = new AnimationManager())
+    }
+
+    public add(animation: Animation): void {
+        this.animations.push(animation)
+    }
+
+    public remove(animation: Animation): void {
+        const index = this.animations.indexOf(animation)
+        if (index >= 0) {
+            this.animations.splice(index, 1)
+        }
+    }
+
+    public update(time: number): boolean {
+        for (let i = 0; i < this.animations.length; i++) {
+            const animation = this.animations[i]
+            if (animation.update(time)) {
+                this.remove(animation)
+            }
+        }
+        return this.animations.length > 0
+    }
+}
+
+
+abstract class Animation {
+    protected duration: number
+    protected form: Record<string, number>
+    protected to: Record<string, number>
+    protected elapsedTime: number
+    protected onEnd: (() => void) | null = null
+
+    constructor(form: Record<string, any>, to: Record<string, number>, duration: number, onEnd: (() => void) | null = null) {
+        this.form = form
+        this.to = to
+        this.duration = duration
+        this.elapsedTime = 0
+        this.onEnd = onEnd
+    }
+
+    abstract update(time: number): boolean;
+
+    protected updateValue(progress: number): boolean {
+        for (const key in this.to) {
+            const from = this.form[key]
+            const to = this.to[key]
+            this.form[key] = from + (to - from) * progress
+        }
+
+        if (progress >= 1) {
+            this.onEnd?.call(this)
+            return false
+        }
+        return true
+    }
+
+    public cancel(): void {
+        AnimationManager.getInstance().remove(this)
+        this.onEnd?.call(this)
+    }
+
+    public run() {
+        AnimationManager.getInstance().add(this)
+    }
+}
+
+class LinearAnimation extends Animation {
+    public update(time: number): boolean {
+        this.elapsedTime += time
+        const progress = this.duration <= 0 ? 1 : this.elapsedTime / this.duration
+        return this.updateValue(progress)
+    }
+}
+
+
 
 export default ImageCropper;
