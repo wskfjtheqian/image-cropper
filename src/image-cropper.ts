@@ -121,7 +121,7 @@ const handIcon: Svg = new Svg(24, 24, [0, 0, 24, 24],
     "c0-0.4-0.1-0.7-0.4-1C19.6,5.6,19.2,5.4,18.8,5.4L18.8,5.4z"]
 )
 
-interface ImageCropperOption {
+export interface ImageCropperOption {
     cursorStrokeLineWidth?: number;
     cursorStrokeColor?: string;
     cursorColor?: string;
@@ -858,6 +858,7 @@ class HandleLayout extends Layout {
         ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
         ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
     }
+
     public drawMask(ctx: CanvasRenderingContext2D): void {
         if (this.config.circle) {
             this.drawEllipse(ctx, this.rect.left, this.rect.top, this.rect.width, this.rect.height)
