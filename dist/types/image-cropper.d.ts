@@ -14,7 +14,7 @@ declare class Svg {
     setViewBox(x: number, y: number, width: number, height: number): void;
     draw(ctx: CanvasRenderingContext2D, drawWidth: number, drawHeight: number, strokeStyle?: string, fillStyle?: string, strokeWidth?: number): void;
 }
-interface ImageCropperOption {
+export interface ImageCropperOption {
     cursorStrokeLineWidth?: number;
     cursorStrokeColor?: string;
     cursorColor?: string;
@@ -110,11 +110,12 @@ declare class ImageLayout extends Layout {
     protected angle: number;
     protected clipRect: Rect;
     protected offset: Point;
-    constructor(parent: Layout | null, cursor?: Svg | null, config?: ImageCropperOption);
+    constructor(parent: Layout | null, config?: ImageCropperOption);
     initScale(rect: Rect): void;
     reset(): void;
     setRect(rect: Rect): void;
     setClipRect(rect: Rect): void;
+    checkOverOut(point: Point): boolean;
     setImage(image: HTMLImageElement): void;
     setRotate(angle: number): void;
     start(): boolean;

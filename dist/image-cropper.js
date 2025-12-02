@@ -268,8 +268,8 @@ class BackgroundLayout extends Layout {
     }
 }
 class ImageLayout extends Layout {
-    constructor(parent, cursor, config) {
-        super(parent, cursor, config);
+    constructor(parent, config) {
+        super(parent, null, config);
         this.scale = 1;
         this.angle = 0;
         this.clipRect = new Rect(0, 0, 0, 0);
@@ -299,6 +299,9 @@ class ImageLayout extends Layout {
         const offset = new Point((this.clipRect.left + this.clipRect.width / 2) - (rect.left + rect.width / 2), (this.clipRect.top + this.clipRect.height / 2) - (rect.top + rect.height / 2));
         this.moveImage(offset);
         this.clipRect = rect;
+    }
+    checkOverOut(point) {
+        return false;
     }
     setImage(image) {
         this.image = image;
@@ -942,6 +945,7 @@ class ImageCropper extends Layout {
         this.end(new Point(event.offsetX, event.offsetY));
     }
     onMouseOver(event) {
+        this.move(new Point(event.offsetX, event.offsetY));
         this.mouseOver = true;
         this.draw(this.canvas2D);
     }
@@ -955,7 +959,7 @@ class ImageCropper extends Layout {
         this.draw(this.canvas2D);
     }
     setImage(image) {
-        this.image = new ImageLayout(this, null, this.config);
+        this.image = new ImageLayout(this, this.config);
         this.image.setRect(this.rect.clone());
         this.image.setImage(image);
         if (this.mask) {
@@ -1063,7 +1067,7 @@ class ImageCropper extends Layout {
         super.draw(ctx);
         if (this.mousePoint && this.drawCursor && this.mouseOver) {
             ctx.save();
-            ctx.translate(this.mousePoint.x - 9, this.mousePoint.y - 9);
+            ctx.translate(this.mousePoint.x - this.config.cursorSize / 2, this.mousePoint.y - this.config.cursorSize / 2);
             this.drawCursor.draw(ctx, this.config.cursorSize, this.config.cursorSize, this.config.cursorStrokeColor, this.config.cursorColor, this.config.cursorStrokeLineWidth);
             ctx.restore();
         }
