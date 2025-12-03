@@ -1,10 +1,10 @@
 const minSize = 12;
-var OutType;
+export var OutType;
 (function (OutType) {
     OutType[OutType["SIZE"] = 0] = "SIZE";
     OutType[OutType["RATIO"] = 1] = "RATIO";
 })(OutType || (OutType = {}));
-class Svg {
+export class Svg {
     constructor(width, height, viewBox, path) {
         this.angle = 0;
         this.width = width;
@@ -74,20 +74,20 @@ const handIcon = new Svg(24, 24, [0, 0, 24, 24], ["M18.8,5.4c-0.4,0-0.7,0.1-1,0.
         "c-0.3,0.2-0.5,0.5-0.6,0.9c-0.1,0.4-0.1,0.8,0.1,1.1s0.2,0.3,0.2,0.3l0.5,1.1L3.8,18c0.6,1.2,1.2,2.2,1.8,3c0.5,0.6,1,1.1,1.5,1.5" +
         "c0.3,0.3,0.7,0.4,1,0.6c0.2,0.1,0.3,0.1,0.4,0.1h6.1c0.9,0,1.8-0.3,2.5-1c0.6-0.5,1.1-1.2,1.5-2.1c1-2.1,1.6-4.8,1.6-8.2V6.8" +
         "c0-0.4-0.1-0.7-0.4-1C19.6,5.6,19.2,5.4,18.8,5.4L18.8,5.4z"]);
-class Point {
+export class Point {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
-class Delta {
+export class Delta {
     constructor(x, y, z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 }
-class Rect {
+export class Rect {
     constructor(left, top, right, bottom) {
         this.left = left;
         this.top = top;
@@ -110,7 +110,7 @@ class Rect {
         return new Rect(this.left, this.top, this.right, this.bottom);
     }
 }
-class Layout {
+export class Layout {
     constructor(parent, cursor, config) {
         this.layoutList = [];
         this.rect = new Rect(0, 0, 0, 0);
@@ -212,7 +212,7 @@ class Layout {
         this.parent?.layoutList.splice(this.parent.layoutList.indexOf(this), 1);
     }
 }
-class BackgroundLayout extends Layout {
+export class BackgroundLayout extends Layout {
     constructor(parent, config) {
         super(parent, clipIcon.clone(), config);
         this.mousePoint = new Point(0, 0);
@@ -267,7 +267,7 @@ class BackgroundLayout extends Layout {
         }
     }
 }
-class ImageLayout extends Layout {
+export class ImageLayout extends Layout {
     constructor(parent, config) {
         super(parent, null, config);
         this.scale = 1;
@@ -407,7 +407,7 @@ class ImageLayout extends Layout {
         });
     }
 }
-class HandleLayout extends Layout {
+export class HandleLayout extends Layout {
     constructor(parent, cursor, config) {
         super(parent, cursor, config);
         this.layoutList = [];
@@ -719,7 +719,7 @@ class HandleLayout extends Layout {
         super.draw(ctx);
     }
 }
-class PointLayout extends Layout {
+export class PointLayout extends Layout {
     constructor(parent, icon, angle, cursor, config) {
         super(parent, cursor, config);
         this.isChecked = false;
@@ -768,7 +768,7 @@ class PointLayout extends Layout {
         ctx.restore();
     }
 }
-class CenterLayout extends PointLayout {
+export class CenterLayout extends PointLayout {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.rect.left, this.rect.top);
@@ -776,7 +776,7 @@ class CenterLayout extends PointLayout {
         ctx.restore();
     }
 }
-class MaskLayout extends Layout {
+export class MaskLayout extends Layout {
     constructor(parent, cursor, config) {
         super(parent, cursor, config);
         this.maskColor = '#88888888';
@@ -868,12 +868,14 @@ class MaskLayout extends Layout {
         return this.handle.getRect();
     }
 }
-class ImageCropper extends Layout {
+export class ImageCropper extends Layout {
     constructor(canvas, config) {
         super(null, null, config);
         this.overLayout = null;
         this.layoutList = [];
         this.mouseOver = false;
+        this.dirty = true;
+        this.time = 0;
         this.background = new BackgroundLayout(this, config);
         const { width, height } = canvas.getBoundingClientRect();
         canvas.style.cursor = "none";
@@ -893,25 +895,26 @@ class ImageCropper extends Layout {
         canvas.addEventListener('touchstart', this.onTouchStart.bind(this));
         canvas.addEventListener('touchmove', this.onTouchMove.bind(this));
         canvas.addEventListener('touchend', this.onTouchEnd.bind(this));
-        this.draw(this.canvas2D);
+        requestAnimationFrame(this.drawLoop.bind(this));
+        this.markDirty();
     }
     setCursor(cursor) {
         this.drawCursor = cursor;
     }
     start(point) {
         super.start(this.mousePoint = point);
-        this.draw(this.canvas2D);
+        this.markDirty();
         return true;
     }
     move(point) {
         this.checkOverOut(point);
         super.move(this.mousePoint = point);
-        this.draw(this.canvas2D);
+        this.markDirty();
         return true;
     }
     end(point) {
         super.end(this.mousePoint = point);
-        this.draw(this.canvas2D);
+        this.markDirty();
         return true;
     }
     onTouchStart(event) {
@@ -947,16 +950,16 @@ class ImageCropper extends Layout {
     onMouseOver(event) {
         this.move(new Point(event.offsetX, event.offsetY));
         this.mouseOver = true;
-        this.draw(this.canvas2D);
+        this.markDirty();
     }
     onMouseOut(event) {
         this.mouseOver = false;
-        this.draw(this.canvas2D);
+        this.markDirty();
     }
     onMouseWheel(event) {
         event.preventDefault();
         this.wheel(new Delta(event.deltaX, event.deltaY, event.deltaZ));
-        this.draw(this.canvas2D);
+        this.markDirty();
     }
     setImage(image) {
         this.image = new ImageLayout(this, this.config);
@@ -968,7 +971,7 @@ class ImageCropper extends Layout {
             this.image.initScale(rect);
         }
         this.layoutList.splice(1, 0, this.image);
-        this.draw(this.canvas2D);
+        this.markDirty();
     }
     setOverLayout(layout) {
         if (this.overLayout != layout) {
@@ -1017,7 +1020,7 @@ class ImageCropper extends Layout {
         this.mask = undefined;
         this.initClipRect(this.config?.defaultClipRect);
         this.image?.reset();
-        this.draw(this.canvas2D);
+        this.markDirty();
     }
     initClipRect(padding) {
         if (padding) {
@@ -1071,6 +1074,82 @@ class ImageCropper extends Layout {
             this.drawCursor.draw(ctx, this.config.cursorSize, this.config.cursorSize, this.config.cursorStrokeColor, this.config.cursorColor, this.config.cursorStrokeLineWidth);
             ctx.restore();
         }
+    }
+    markDirty() {
+        this.dirty = true;
+    }
+    drawLoop(time) {
+        if (this.dirty) {
+            this.draw(this.canvas2D);
+            this.dirty = false;
+        }
+        this.dirty = AnimationManager.getInstance().update(time - this.time);
+        this.time = time;
+        requestAnimationFrame(this.drawLoop.bind(this));
+    }
+}
+//动画管理器
+export class AnimationManager {
+    constructor() {
+        this.animations = [];
+    }
+    static getInstance() {
+        return AnimationManager.instance ?? (AnimationManager.instance = new AnimationManager());
+    }
+    add(animation) {
+        this.animations.push(animation);
+    }
+    remove(animation) {
+        const index = this.animations.indexOf(animation);
+        if (index >= 0) {
+            this.animations.splice(index, 1);
+        }
+    }
+    update(time) {
+        for (let i = 0; i < this.animations.length; i++) {
+            const animation = this.animations[i];
+            if (animation.update(time)) {
+                this.remove(animation);
+            }
+        }
+        return this.animations.length > 0;
+    }
+}
+AnimationManager.instance = null;
+export class Animation {
+    constructor(form, to, duration, onEnd = null) {
+        this.onEnd = null;
+        this.form = form;
+        this.to = to;
+        this.duration = duration;
+        this.elapsedTime = 0;
+        this.onEnd = onEnd;
+    }
+    updateValue(progress) {
+        for (const key in this.to) {
+            const from = this.form[key];
+            const to = this.to[key];
+            this.form[key] = from + (to - from) * progress;
+        }
+        if (progress >= 1) {
+            this.onEnd?.call(this);
+            return false;
+        }
+        return true;
+    }
+    cancel() {
+        AnimationManager.getInstance().remove(this);
+        this.onEnd?.call(this);
+    }
+    run() {
+        AnimationManager.getInstance().add(this);
+    }
+}
+export class LinearAnimation extends Animation {
+    update(time) {
+        this.elapsedTime += time;
+        const progress = this.duration <= 0 ? 1 : this.elapsedTime / this.duration;
+        return this.updateValue(progress);
     }
 }
 export default ImageCropper;

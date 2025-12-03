@@ -1,8 +1,8 @@
-declare enum OutType {
+export declare enum OutType {
     SIZE = 0,
     RATIO = 1
 }
-declare class Svg {
+export declare class Svg {
     protected width: number;
     protected height: number;
     protected angle: number;
@@ -41,18 +41,18 @@ export interface ImageCropperOption {
     circle?: boolean;
     circleRadius?: number;
 }
-declare class Point {
+export declare class Point {
     x: number;
     y: number;
     constructor(x: number, y: number);
 }
-declare class Delta {
+export declare class Delta {
     x: number;
     y: number;
     z: number;
     constructor(x: number, y: number, z: number);
 }
-declare class Rect {
+export declare class Rect {
     left: number;
     top: number;
     right: number;
@@ -68,7 +68,7 @@ interface Root {
     setCursor(cursor?: Svg | null): void;
     setOverLayout(layout: Layout, point: Point): void;
 }
-declare abstract class Layout {
+export declare class Layout {
     protected layoutList: Layout[];
     protected rect: Rect;
     protected parent: Layout | null;
@@ -89,7 +89,7 @@ declare abstract class Layout {
     draw(ctx: CanvasRenderingContext2D): void;
     remove(): void;
 }
-declare class BackgroundLayout extends Layout {
+export declare class BackgroundLayout extends Layout {
     protected mousePoint: Point;
     protected selectRect: Rect;
     protected onStartSelect: ((rect: Rect) => void) | null;
@@ -104,7 +104,7 @@ declare class BackgroundLayout extends Layout {
     end(): boolean;
     draw(ctx: CanvasRenderingContext2D): void;
 }
-declare class ImageLayout extends Layout {
+export declare class ImageLayout extends Layout {
     protected image?: HTMLImageElement;
     protected scale: number;
     protected angle: number;
@@ -128,7 +128,7 @@ declare class ImageLayout extends Layout {
     toBlob(type?: string, quality?: any): Promise<Blob | null>;
     toDataUrl(type?: string, quality?: any): Promise<string>;
 }
-declare class HandleLayout extends Layout {
+export declare class HandleLayout extends Layout {
     protected center: PointLayout;
     protected topLeft: PointLayout;
     protected topCenter: PointLayout;
@@ -165,7 +165,7 @@ declare class HandleLayout extends Layout {
     private drawLine;
     draw(ctx: CanvasRenderingContext2D): void;
 }
-declare class PointLayout extends Layout {
+export declare class PointLayout extends Layout {
     protected isChecked: boolean;
     protected mousePoint: Point;
     protected onMoveLayout: ((offset: Point) => void) | null;
@@ -180,7 +180,10 @@ declare class PointLayout extends Layout {
     end(point: Point): boolean;
     draw(ctx: CanvasRenderingContext2D): void;
 }
-declare class MaskLayout extends Layout {
+export declare class CenterLayout extends PointLayout {
+    draw(ctx: CanvasRenderingContext2D): void;
+}
+export declare class MaskLayout extends Layout {
     protected maskColor: string;
     protected isSelect: boolean;
     protected handle: HandleLayout;
@@ -199,7 +202,7 @@ declare class MaskLayout extends Layout {
     draw(ctx: CanvasRenderingContext2D): void;
     getClipRect(): Rect;
 }
-declare class ImageCropper extends Layout implements Root {
+export declare class ImageCropper extends Layout implements Root {
     protected canvas: HTMLCanvasElement;
     protected canvas2D: CanvasRenderingContext2D;
     protected background: BackgroundLayout;
@@ -210,6 +213,8 @@ declare class ImageCropper extends Layout implements Root {
     protected mousePoint?: Point;
     protected drawCursor?: Svg | null;
     protected mouseOver: boolean;
+    private dirty;
+    private time;
     constructor(canvas: HTMLCanvasElement, config?: ImageCropperOption);
     setCursor(cursor?: Svg | null): void;
     start(point: Point): boolean;
@@ -233,5 +238,30 @@ declare class ImageCropper extends Layout implements Root {
     protected initClipRect(padding?: Rect | null): void;
     protected createMask(rect: Rect): void;
     draw(ctx: CanvasRenderingContext2D): void;
+    protected markDirty(): void;
+    protected drawLoop(time: DOMHighResTimeStamp): void;
+}
+export declare class AnimationManager {
+    private animations;
+    private static instance;
+    static getInstance(): AnimationManager;
+    add(animation: Animation): void;
+    remove(animation: Animation): void;
+    update(time: number): boolean;
+}
+export declare abstract class Animation {
+    protected duration: number;
+    protected form: Record<string, number>;
+    protected to: Record<string, number>;
+    protected elapsedTime: number;
+    protected onEnd: (() => void) | null;
+    constructor(form: Record<string, any>, to: Record<string, number>, duration: number, onEnd?: (() => void) | null);
+    abstract update(time: number): boolean;
+    protected updateValue(progress: number): boolean;
+    cancel(): void;
+    run(): void;
+}
+export declare class LinearAnimation extends Animation {
+    update(time: number): boolean;
 }
 export default ImageCropper;
