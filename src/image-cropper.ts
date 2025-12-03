@@ -1388,6 +1388,12 @@ class ImageCropper extends Layout implements Root {
         this.time = time
         requestAnimationFrame(this.drawLoop.bind(this))
     }
+
+    public aa() {
+        new LinearAnimation(this.image!, {scale: 2}, 4000, () => {
+            new LinearAnimation(this.image!, {scale: 0.2}, 4000).run()
+        }).run()
+    }
 }
 
 //动画管理器
@@ -1414,7 +1420,7 @@ class AnimationManager {
     public update(time: number): boolean {
         for (let i = 0; i < this.animations.length; i++) {
             const animation = this.animations[i]
-            if (animation.update(time)) {
+            if (!animation.update(time)) {
                 this.remove(animation)
             }
         }
@@ -1425,13 +1431,17 @@ class AnimationManager {
 
 abstract class Animation {
     protected duration: number
-    protected form: Record<string, number>
-    protected to: Record<string, number>
+    protected target: Record<string, number> = {}
+    protected form: Record<string, number> = {}
+    protected to: Record<string, number> = {}
     protected elapsedTime: number
     protected onEnd: (() => void) | null = null
 
     constructor(form: Record<string, any>, to: Record<string, number>, duration: number, onEnd: (() => void) | null = null) {
-        this.form = form
+        for (const key in to) {
+            this.form[key] = form[key]
+        }
+        this.target = form
         this.to = to
         this.duration = duration
         this.elapsedTime = 0
@@ -1444,7 +1454,10 @@ abstract class Animation {
         for (const key in this.to) {
             const from = this.form[key]
             const to = this.to[key]
-            this.form[key] = from + (to - from) * progress
+            if (from != undefined && to != undefined) {
+                this.target[key] = from + (to - from) * progress
+                console.log(key, this.target[key], from, to, progress)
+            }
         }
 
         if (progress >= 1) {
@@ -1471,7 +1484,5 @@ class LinearAnimation extends Animation {
         return this.updateValue(progress)
     }
 }
-
-
 
 export default ImageCropper;

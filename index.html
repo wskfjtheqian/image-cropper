@@ -8,6 +8,7 @@
 <body style="display: flex">
 <canvas id="image-cropper" style="width: 800px; height: 600px;"></canvas>
 <button id="reset-button">Reset</button>
+<button id="Animate">Animate</button>
 <div>
     <img id="image-preview" src="" alt="Preview"
          style="display: none; width: 300px; height: 300px; object-fit: contain;">
@@ -72,6 +73,12 @@
         const preview = document.getElementById('image-preview')
         preview.style.display = 'none'
     })
+
+    document.getElementById('Animate').addEventListener('click', () => {
+      cropper.aa()
+    })
+
+
 </script>
 </body>
 
