@@ -1,11 +1,11 @@
 const minSize: number = 12
 
-enum OutType {
+export enum OutType {
     SIZE,
     RATIO,
 }
 
-class Svg {
+export class Svg {
     protected width: number;
     protected height: number;
     protected angle: number = 0;
@@ -149,7 +149,7 @@ export interface ImageCropperOption {
     circleRadius?: number
 }
 
-class Point {
+export class Point {
     x: number
     y: number
 
@@ -159,7 +159,7 @@ class Point {
     }
 }
 
-class Delta {
+export class Delta {
     x: number
     y: number
     z: number
@@ -171,7 +171,7 @@ class Delta {
     }
 }
 
-class Rect {
+export class Rect {
     left: number
     top: number
     right: number
@@ -212,7 +212,7 @@ interface Root {
     setOverLayout(layout: Layout, point: Point): void
 }
 
-abstract class Layout {
+export class Layout {
     protected layoutList: Layout[] = []
     protected rect: Rect = new Rect(0, 0, 0, 0)
     protected parent: Layout | null = null
@@ -330,7 +330,7 @@ abstract class Layout {
     }
 }
 
-class BackgroundLayout extends Layout {
+export class BackgroundLayout extends Layout {
     protected mousePoint: Point = new Point(0, 0);
     protected selectRect: Rect = new Rect(0, 0, 0, 0)
     protected onStartSelect: ((rect: Rect) => void) | null = null
@@ -397,7 +397,7 @@ class BackgroundLayout extends Layout {
     }
 }
 
-class ImageLayout extends Layout {
+export class ImageLayout extends Layout {
     protected image?: HTMLImageElement
     protected scale: number = 1;
     protected angle: number = 0;
@@ -565,7 +565,7 @@ class ImageLayout extends Layout {
     }
 }
 
-class HandleLayout extends Layout {
+export class HandleLayout extends Layout {
     protected center: PointLayout
     protected topLeft: PointLayout
     protected topCenter: PointLayout
@@ -925,7 +925,7 @@ class HandleLayout extends Layout {
 }
 
 
-class PointLayout extends Layout {
+export class PointLayout extends Layout {
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onMoveLayout: ((offset: Point) => void) | null = null
@@ -995,7 +995,7 @@ class PointLayout extends Layout {
     }
 }
 
-class CenterLayout extends PointLayout {
+export class CenterLayout extends PointLayout {
 
     public draw(ctx: CanvasRenderingContext2D): void {
         ctx.save()
@@ -1010,7 +1010,7 @@ class CenterLayout extends PointLayout {
     }
 }
 
-class MaskLayout extends Layout {
+export class MaskLayout extends Layout {
     protected maskColor: string = '#88888888';
     protected isSelect: boolean = true
     protected handle: HandleLayout
@@ -1122,7 +1122,7 @@ class MaskLayout extends Layout {
     }
 }
 
-class ImageCropper extends Layout implements Root {
+export class ImageCropper extends Layout implements Root {
     protected canvas: HTMLCanvasElement;
     protected canvas2D: CanvasRenderingContext2D
     protected background: BackgroundLayout
@@ -1391,7 +1391,7 @@ class ImageCropper extends Layout implements Root {
 }
 
 //动画管理器
-class AnimationManager {
+export class AnimationManager {
     private animations: Animation[] = []
 
     private static instance: AnimationManager | null = null
@@ -1422,8 +1422,7 @@ class AnimationManager {
     }
 }
 
-
-abstract class Animation {
+export abstract class Animation {
     protected duration: number
     protected form: Record<string, number>
     protected to: Record<string, number>
@@ -1464,14 +1463,13 @@ abstract class Animation {
     }
 }
 
-class LinearAnimation extends Animation {
+export class LinearAnimation extends Animation {
     public update(time: number): boolean {
         this.elapsedTime += time
         const progress = this.duration <= 0 ? 1 : this.elapsedTime / this.duration
         return this.updateValue(progress)
     }
 }
-
 
 
 export default ImageCropper;
