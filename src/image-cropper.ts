@@ -1,6 +1,6 @@
 import {Transform} from "../aa";
 
-const minSize: number = 12
+const minSize: number = 100
 
 export enum OutType {
     SIZE,
@@ -199,7 +199,7 @@ export class Rect {
     }
 
     get center(): Point {
-        return new Point((this.right - this.left) / 2, (this.bottom - this.top) / 2)
+        return new Point(this.left + (this.right - this.left) / 2, this.top + (this.bottom - this.top) / 2)
     }
 
     public clone(): Rect {
@@ -618,6 +618,7 @@ export class ImageLayout extends Layout {
             this.rect.center
         )
 
+
     }
 }
 
@@ -978,6 +979,30 @@ export class HandleLayout extends Layout {
 
         super.draw(ctx)
     }
+
+    public endSelect() {
+        if (this.rect.width < minSize || this.rect.height < minSize) {
+            const size = minSize / 2
+            const center = this.rect.center
+            const to = new Rect(center.x - size, center.y - size, center.x + size, center.y + size)
+            new LinearAnimation(this.rect, to as Record<string, any>, 200).run()
+
+            const {left, top, right, bottom} = to
+            const width = right - left
+            const height = bottom - top
+            const diameter = this.config.pointRadius! * 2
+
+            this.center.endSelect(Rect.fromSize(left + width / 2, top + height / 2, diameter, diameter))
+            this.topLeft.endSelect(Rect.fromSize(left, top, diameter, diameter))
+            this.topCenter.endSelect(Rect.fromSize(left + width / 2, top, diameter, diameter))
+            this.topRight.endSelect(Rect.fromSize(right, top, diameter, diameter))
+            this.centerLeft.endSelect(Rect.fromSize(left, top + height / 2, diameter, diameter))
+            this.centerRight.endSelect(Rect.fromSize(right, top + height / 2, diameter, diameter))
+            this.bottomLeft.endSelect(Rect.fromSize(left, bottom, diameter, diameter))
+            this.bottomCenter.endSelect(Rect.fromSize(left + width / 2, bottom, diameter, diameter))
+            this.bottomRight.endSelect(Rect.fromSize(right, bottom, diameter, diameter))
+        }
+    }
 }
 
 export class PointLayout extends Layout {
@@ -1047,6 +1072,16 @@ export class PointLayout extends Layout {
             this.config.borderWidth!
         )
         ctx.restore()
+    }
+
+    endSelect(rect: Rect) {
+        const to = new Rect(
+            rect.left - this.config.pointRadius!,
+            rect.top - this.config.pointRadius!,
+            rect.right - this.config.pointRadius!,
+            rect.bottom - this.config.pointRadius!,
+        )
+        new LinearAnimation(this.rect, to as Record<string, any>, 200).run()
     }
 }
 
@@ -1142,12 +1177,33 @@ export class MaskLayout extends Layout {
     }
 
     public setHandleRect(rect: Rect): void {
+        if (rect.left > rect.right) {
+            const temp = rect.left
+            rect.left = rect.right
+            rect.right = temp
+        }
+        if (rect.top > rect.bottom) {
+            const temp = rect.top
+            rect.top = rect.bottom
+            rect.bottom = temp
+        }
         this.handle.setRect(rect)
     }
 
     public endSelect(rect: Rect): void {
+        if (rect.left > rect.right) {
+            const temp = rect.left
+            rect.left = rect.right
+            rect.right = temp
+        }
+        if (rect.top > rect.bottom) {
+            const temp = rect.top
+            rect.top = rect.bottom
+            rect.bottom = temp
+        }
         this.handle.setRect(rect)
         this.isSelect = false
+        this.handle.endSelect()
     }
 
     public setOnMoveLayout(callback: (offset: Point) => void) {
@@ -1444,11 +1500,6 @@ export class ImageCropper extends Layout implements Root {
         requestAnimationFrame(this.drawLoop.bind(this))
     }
 
-    public aa() {
-        new LinearAnimation(this.image!, {scale: 2}, 4000, () => {
-            new LinearAnimation(this.image!, {scale: 0.2}, 4000).run()
-        }).run()
-    }
 }
 
 //动画管理器
@@ -1490,8 +1541,10 @@ export abstract class Animation {
     protected to: Record<string, number> = {}
     protected elapsedTime: number
     protected onEnd: (() => void) | null = null
+    protected isFinished: boolean = false
 
     constructor(form: Record<string, any>, to: Record<string, number>, duration: number, onEnd: (() => void) | null = null) {
+        console.log(to)
         for (const key in to) {
             this.form[key] = form[key]
         }
@@ -1505,18 +1558,20 @@ export abstract class Animation {
     abstract update(time: number): boolean;
 
     protected updateValue(progress: number): boolean {
+        if (this.isFinished) {
+            this.onEnd?.call(this)
+            return false
+        }
         for (const key in this.to) {
             const from = this.form[key]
             const to = this.to[key]
             if (from != undefined && to != undefined) {
                 this.target[key] = from + (to - from) * progress
-                console.log(key, this.target[key], from, to, progress)
             }
         }
 
         if (progress >= 1) {
-            this.onEnd?.call(this)
-            return false
+            this.isFinished = true
         }
         return true
     }
