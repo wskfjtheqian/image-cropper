@@ -1,4 +1,4 @@
-import {Transform} from "../aa";
+import {Point2D, Transform} from "../aa";
 
 const minSize: number = 100
 
@@ -190,6 +190,10 @@ export class Rect {
         return new Rect(left, top, left + width, top + height)
     }
 
+    public static fromCenter(center: Point, width: number, height: number): Rect {
+        return new Rect(center.x - width / 2, center.y - height / 2, center.x + width / 2, center.y + height / 2)
+    }
+
     get width() {
         return this.right - this.left
     }
@@ -206,6 +210,9 @@ export class Rect {
         return new Rect(this.left, this.top, this.right, this.bottom)
     }
 
+    public toString(): string {
+        return `rect[${this.left.toFixed(2)}, ${this.top.toFixed(2)}, ${this.right.toFixed(2)}, ${this.bottom.toFixed(2)}],size[${this.width.toFixed(2)}, ${this.height.toFixed(2)}],center[${this.center.x.toFixed(2)}, ${this.center.y.toFixed(2)}]`
+    }
 }
 
 export interface Transform {
@@ -217,7 +224,7 @@ export interface Transform {
 }
 
 export function inverseTransform(
-    points: Point[],
+    clipRect: Rect,
     transform: Transform,
     targetCenter: Point
 ): Point[] {
@@ -225,20 +232,50 @@ export function inverseTransform(
     const cosTheta = Math.cos(rotation);
     const sinTheta = Math.sin(rotation);
 
+    const center = clipRect.center;
+    const points: Point[] = [
+        {x: clipRect.left, y: clipRect.top},
+        {x: clipRect.right, y: clipRect.top},
+        {x: clipRect.left, y: clipRect.bottom},
+        {x: clipRect.right, y: clipRect.bottom},
+    ]
+
     return points.map((point) => {
-        let x = point.x - translateX;
-        let y = point.y - translateY;
-        const xRotated = x * cosTheta + y * sinTheta;
-        const yRotated = -x * sinTheta + y * cosTheta;
-        const xScaled = xRotated / scaleX;
-        const yScaled = yRotated / scaleY;
+        // 当旋转点和缩放点都是矩形A的中心时，变换的数学表示：
+        // 设矩形A的中心为 C_A，变换参数为 S(缩放)、R(旋转)、T(平移)
+        // 对于矩形B上的一个点 P（局部坐标），变换到全局坐标 P' 的公式为：
+        // P' = T + R(S(P - C_A) + C_A - C_A) + C_A
+        // 简化后：P' = T + R(S(P - C_A)) + C_A
+        // 即：P' = T + C_A + R(S(P - C_A))
+
+        // 逆变换（从 P' 求 P）：
+        // 1. 减去平移和矩形A中心：P1 = P' - T - C_A
+        // 2. 逆旋转：P2 = R^{-1}(P1) = R^T(P1)
+        // 3. 逆缩放：P3 = P2 / S + C_A
+        // 4. 减去目标中心：P4 = P3 - targetCenter
+
+        // 步骤1: 减去平移和矩形A的中心
+
+        const p1x = point.x - translateX - center.x;
+        const p1y = point.y - translateY - center.y;
+
+        // 步骤2: 逆旋转（应用旋转矩阵的转置）
+        // 旋转矩阵 R = [[cosθ, -sinθ], [sinθ, cosθ]]
+        // 逆旋转矩阵 R^{-1} = R^T = [[cosθ, sinθ], [-sinθ, cosθ]]
+        const p2x = p1x * cosTheta + p1y * sinTheta;
+        const p2y = -p1x * sinTheta + p1y * cosTheta;
+
+        // 步骤3: 逆缩放并加上矩形A的中心
+        const p3x = p2x / scaleX + center.x;
+        const p3y = p2y / scaleY + center.y;
+
+        // 步骤4: 减去目标中心坐标（转换到目标局部坐标系）
         return {
-            x: xScaled - targetCenter.x,
-            y: yScaled - targetCenter.y
+            x: p3x - targetCenter.x,
+            y: p3y - targetCenter.y
         };
     })
 }
-
 
 interface Root {
     setCursor(cursor?: Svg | null): void
@@ -483,7 +520,7 @@ export class ImageLayout extends Layout {
         this.image = image
         const scaleX = this.rect.width / image.width;
         const scaleY = this.rect.height / image.height;
-        this.scale = Math.min(scaleX, scaleY)
+        // this.scale = Math.min(scaleX, scaleY)
     }
 
     public setRotate(angle: number): void {
@@ -600,26 +637,64 @@ export class ImageLayout extends Layout {
         });
     }
 
-    public checkClipRect(): void {
-        const points = inverseTransform(
-            [
-                {x: this.clipRect.left, y: this.clipRect.top},
-                {x: this.clipRect.right, y: this.clipRect.top},
-                {x: this.clipRect.right, y: this.clipRect.bottom},
-                {x: this.clipRect.left, y: this.clipRect.bottom},
-            ],
-            {
-                scaleX: 1 / this.scale,
-                scaleY: 1 / this.scale,
-                rotation: -this.angle * Math.PI / 180,
-                translateX: -this.offset.x / this.scale,
-                translateY: -this.offset.y / this.scale,
-            },
-            this.rect.center
-        )
+    public onEndSelect(): void {
+        const imageRect = Rect.fromCenter(this.rect.center, this.image!.width, this.image!.height)
+        console.log("Clip 的位置", this.clipRect.toString())
+        console.log("Image 的位置", imageRect.toString())
+        const center = imageRect.center
 
+        const offset = new Point(this.offset.x + center.x, this.offset.y + center.y)
+        console.log("Offset 的相对位置", this.offset)
+        console.log("Offset 的位置", offset)
+        const points = inverseTransform(
+            this.clipRect,
+            {
+                rotation: -this.angle * Math.PI / 180,
+                scaleX: this.scale,
+                scaleY: this.scale,
+                translateX: -this.offset.x,
+                translateY: -this.offset.y,
+            },
+            imageRect.center
+        )
+        console.log(points)
+
+        let isInside = true
+        points.forEach(point => {
+            if (!isPointInsideAxisAlignedRect(point, this.image!.width, this.image!.height)) {    // 超出范围
+                isInside = false
+            }
+        })
+
+        console.log(isInside)
 
     }
+}
+
+
+/**
+ * 检查点是否在轴对齐矩形内部
+ */
+function isPointInsideAxisAlignedRect(
+    point: Point2D,
+    rectWidth: number,
+    rectHeight: number,
+    rectCenter: Point2D = {x: 0, y: 0},
+    epsilon: number = 1e-10
+): boolean {
+    const halfWidth = rectWidth / 2;
+    const halfHeight = rectHeight / 2;
+
+    // 相对于矩形中心的坐标
+    const xRelative = point.x - rectCenter.x;
+    const yRelative = point.y - rectCenter.y;
+
+    return (
+        xRelative >= -halfWidth - epsilon &&
+        xRelative <= halfWidth + epsilon &&
+        yRelative >= -halfHeight - epsilon &&
+        yRelative <= halfHeight + epsilon
+    );
 }
 
 export class HandleLayout extends Layout {
@@ -636,6 +711,7 @@ export class HandleLayout extends Layout {
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onMoveLayout: ((offset: Point) => void) | null = null
+    protected onEndMoveLayout: ((offset: Point) => void) | null = null
     protected onEndSelect: ((rect: Rect) => void) | null = null
 
     constructor(parent: Layout, cursor?: Svg | null, config?: ImageCropperOption) {
@@ -690,6 +766,10 @@ export class HandleLayout extends Layout {
 
     public setOnMoveLayout(callback: (offset: Point) => void) {
         this.onMoveLayout = callback
+    }
+
+    public setOnEndMoveLayout(callback: (offset: Point) => void) {
+        this.onEndMoveLayout = callback
     }
 
     public setOnEndSelect(callback: (rect: Rect) => void) {
@@ -875,7 +955,7 @@ export class HandleLayout extends Layout {
 
     public end(point: Point): boolean {
         if (this.isChecked) {
-            this.onMoveLayout?.call(this, new Point(point.x - this.mousePoint.x, point.y - this.mousePoint.y))
+            this.onEndMoveLayout?.call(this, new Point(point.x - this.mousePoint.x, point.y - this.mousePoint.y))
             this.mousePoint = point
             this.isChecked = false
         }
@@ -985,7 +1065,9 @@ export class HandleLayout extends Layout {
             const size = minSize / 2
             const center = this.rect.center
             const to = new Rect(center.x - size, center.y - size, center.x + size, center.y + size)
-            new LinearAnimation(this.rect, to as Record<string, any>, 200).run()
+            new LinearAnimation(this.rect, to as Record<string, any>, 200, () => {
+                this.onEndLayout()
+            }).run()
 
             const {left, top, right, bottom} = to
             const width = right - left
@@ -1107,6 +1189,7 @@ export class MaskLayout extends Layout {
     protected isChecked: boolean = false;
     protected mousePoint: Point = new Point(0, 0);
     protected onRotateLayout: ((angle: number) => void) | null = null
+    protected onEndRotateLayout: (() => void) | null = null
 
     constructor(parent: Layout, cursor?: Svg | null, config?: ImageCropperOption) {
         super(parent, cursor, config)
@@ -1116,6 +1199,10 @@ export class MaskLayout extends Layout {
 
     public setOnRotateLayout(callback: (angle: number) => void) {
         this.onRotateLayout = callback
+    }
+
+    public setOnEndRotateLayout(callback: () => void) {
+        this.onEndRotateLayout = callback
     }
 
     public setOnEndSelect(callback: (rect: Rect) => void) {
@@ -1172,6 +1259,7 @@ export class MaskLayout extends Layout {
             return false
         }
         this.isChecked = false
+        this.onEndRotateLayout?.call(this)
         super.end(point)
         return true
     }
@@ -1208,6 +1296,10 @@ export class MaskLayout extends Layout {
 
     public setOnMoveLayout(callback: (offset: Point) => void) {
         this.handle.setOnMoveLayout(callback)
+    }
+
+    public setOnEndMoveLayout(callback: (offset: Point) => void) {
+        this.handle.setOnEndMoveLayout(callback)
     }
 
     public draw(ctx: CanvasRenderingContext2D): void {
@@ -1459,11 +1551,21 @@ export class ImageCropper extends Layout implements Root {
         this.mask.setOnMoveLayout((offset: Point) => {
             this.image?.moveImage(offset)
         })
+        this.mask.setOnEndMoveLayout((offset: Point) => {
+            this.image?.moveImage(offset)
+            this.image?.onEndSelect()
+        })
+
         this.mask.setOnRotateLayout((angle: number) => {
             this.image?.setRotate(angle)
         })
+        this.mask.setOnEndRotateLayout(() => {
+            this.image?.onEndSelect()
+        })
+
         this.mask.setOnEndSelect((rect: Rect) => {
             this.image?.setClipRect(rect.clone())
+            this.image?.onEndSelect()
         })
         this.mask.setRect(this.rect)
         this.mask.setHandleRect(rect)
@@ -1544,7 +1646,6 @@ export abstract class Animation {
     protected isFinished: boolean = false
 
     constructor(form: Record<string, any>, to: Record<string, number>, duration: number, onEnd: (() => void) | null = null) {
-        console.log(to)
         for (const key in to) {
             this.form[key] = form[key]
         }
