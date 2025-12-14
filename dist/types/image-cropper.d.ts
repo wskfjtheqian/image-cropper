@@ -59,11 +59,21 @@ export declare class Rect {
     bottom: number;
     constructor(left: number, top: number, right: number, bottom: number);
     static fromSize(left: number, top: number, width: number, height: number): Rect;
+    static fromCenter(center: Point, width: number, height: number): Rect;
     get width(): number;
     get height(): number;
     get center(): Point;
     clone(): Rect;
+    toString(): string;
 }
+export interface Transform {
+    scaleX: number;
+    scaleY: number;
+    rotation: number;
+    translateX: number;
+    translateY: number;
+}
+export declare function inverseTransform(clipRect: Rect, transform: Transform, targetCenter: Point): Point[];
 interface Root {
     setCursor(cursor?: Svg | null): void;
     setOverLayout(layout: Layout, point: Point): void;
@@ -127,6 +137,7 @@ export declare class ImageLayout extends Layout {
     protected getClipCanvas(): HTMLCanvasElement;
     toBlob(type?: string, quality?: any): Promise<Blob | null>;
     toDataUrl(type?: string, quality?: any): Promise<string>;
+    onEndSelect(): void;
 }
 export declare class HandleLayout extends Layout {
     protected center: PointLayout;
@@ -142,10 +153,12 @@ export declare class HandleLayout extends Layout {
     protected isChecked: boolean;
     protected mousePoint: Point;
     protected onMoveLayout: ((offset: Point) => void) | null;
+    protected onEndMoveLayout: ((offset: Point) => void) | null;
     protected onEndSelect: ((rect: Rect) => void) | null;
     constructor(parent: Layout, cursor?: Svg | null, config?: ImageCropperOption);
     onEndLayout(): void;
     setOnMoveLayout(callback: (offset: Point) => void): void;
+    setOnEndMoveLayout(callback: (offset: Point) => void): void;
     setOnEndSelect(callback: (rect: Rect) => void): void;
     protected onMoveCenter(offset: Point): void;
     protected onMoveTopLeft(offset: Point): void;
@@ -164,6 +177,7 @@ export declare class HandleLayout extends Layout {
     drawMask(ctx: CanvasRenderingContext2D): void;
     private drawLine;
     draw(ctx: CanvasRenderingContext2D): void;
+    endSelect(): void;
 }
 export declare class PointLayout extends Layout {
     protected isChecked: boolean;
@@ -179,6 +193,7 @@ export declare class PointLayout extends Layout {
     move(point: Point): boolean;
     end(point: Point): boolean;
     draw(ctx: CanvasRenderingContext2D): void;
+    endSelect(rect: Rect): void;
 }
 export declare class CenterLayout extends PointLayout {
     draw(ctx: CanvasRenderingContext2D): void;
@@ -190,8 +205,10 @@ export declare class MaskLayout extends Layout {
     protected isChecked: boolean;
     protected mousePoint: Point;
     protected onRotateLayout: ((angle: number) => void) | null;
+    protected onEndRotateLayout: (() => void) | null;
     constructor(parent: Layout, cursor?: Svg | null, config?: ImageCropperOption);
     setOnRotateLayout(callback: (angle: number) => void): void;
+    setOnEndRotateLayout(callback: () => void): void;
     setOnEndSelect(callback: (rect: Rect) => void): void;
     start(point: Point): boolean;
     move(point: Point): boolean;
@@ -199,6 +216,7 @@ export declare class MaskLayout extends Layout {
     setHandleRect(rect: Rect): void;
     endSelect(rect: Rect): void;
     setOnMoveLayout(callback: (offset: Point) => void): void;
+    setOnEndMoveLayout(callback: (offset: Point) => void): void;
     draw(ctx: CanvasRenderingContext2D): void;
     getClipRect(): Rect;
 }
@@ -251,10 +269,12 @@ export declare class AnimationManager {
 }
 export declare abstract class Animation {
     protected duration: number;
+    protected target: Record<string, number>;
     protected form: Record<string, number>;
     protected to: Record<string, number>;
     protected elapsedTime: number;
     protected onEnd: (() => void) | null;
+    protected isFinished: boolean;
     constructor(form: Record<string, any>, to: Record<string, number>, duration: number, onEnd?: (() => void) | null);
     abstract update(time: number): boolean;
     protected updateValue(progress: number): boolean;

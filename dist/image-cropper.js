@@ -1,4 +1,4 @@
-const minSize = 12;
+const minSize = 20;
 export var OutType;
 (function (OutType) {
     OutType[OutType["SIZE"] = 0] = "SIZE";
@@ -97,6 +97,9 @@ export class Rect {
     static fromSize(left, top, width, height) {
         return new Rect(left, top, left + width, top + height);
     }
+    static fromCenter(center, width, height) {
+        return new Rect(center.x - width / 2, center.y - height / 2, center.x + width / 2, center.y + height / 2);
+    }
     get width() {
         return this.right - this.left;
     }
@@ -104,11 +107,55 @@ export class Rect {
         return this.bottom - this.top;
     }
     get center() {
-        return new Point((this.right - this.left) / 2, (this.bottom - this.top) / 2);
+        return new Point(this.left + (this.right - this.left) / 2, this.top + (this.bottom - this.top) / 2);
     }
     clone() {
         return new Rect(this.left, this.top, this.right, this.bottom);
     }
+    toString() {
+        return `rect[${this.left.toFixed(2)}, ${this.top.toFixed(2)}, ${this.right.toFixed(2)}, ${this.bottom.toFixed(2)}],size[${this.width.toFixed(2)}, ${this.height.toFixed(2)}],center[${this.center.x.toFixed(2)}, ${this.center.y.toFixed(2)}]`;
+    }
+}
+export function inverseTransform(clipRect, transform, targetCenter) {
+    const { scaleX, scaleY, rotation, translateX, translateY } = transform;
+    const cosTheta = Math.cos(rotation);
+    const sinTheta = Math.sin(rotation);
+    const center = clipRect.center;
+    const points = [
+        { x: clipRect.left, y: clipRect.top },
+        { x: clipRect.right, y: clipRect.top },
+        { x: clipRect.left, y: clipRect.bottom },
+        { x: clipRect.right, y: clipRect.bottom },
+    ];
+    return points.map((point) => {
+        // 当旋转点和缩放点都是矩形A的中心时，变换的数学表示：
+        // 设矩形A的中心为 C_A，变换参数为 S(缩放)、R(旋转)、T(平移)
+        // 对于矩形B上的一个点 P（局部坐标），变换到全局坐标 P' 的公式为：
+        // P' = T + R(S(P - C_A) + C_A - C_A) + C_A
+        // 简化后：P' = T + R(S(P - C_A)) + C_A
+        // 即：P' = T + C_A + R(S(P - C_A))
+        // 逆变换（从 P' 求 P）：
+        // 1. 减去平移和矩形A中心：P1 = P' - T - C_A
+        // 2. 逆旋转：P2 = R^{-1}(P1) = R^T(P1)
+        // 3. 逆缩放：P3 = P2 / S + C_A
+        // 4. 减去目标中心：P4 = P3 - targetCenter
+        // 步骤1: 减去平移和矩形A的中心
+        const p1x = point.x - translateX - center.x;
+        const p1y = point.y - translateY - center.y;
+        // 步骤2: 逆旋转（应用旋转矩阵的转置）
+        // 旋转矩阵 R = [[cosθ, -sinθ], [sinθ, cosθ]]
+        // 逆旋转矩阵 R^{-1} = R^T = [[cosθ, sinθ], [-sinθ, cosθ]]
+        const p2x = p1x * cosTheta + p1y * sinTheta;
+        const p2y = -p1x * sinTheta + p1y * cosTheta;
+        // 步骤3: 逆缩放并加上矩形A的中心
+        const p3x = p2x / scaleX + center.x;
+        const p3y = p2y / scaleY + center.y;
+        // 步骤4: 减去目标中心坐标（转换到目标局部坐标系）
+        return {
+            x: p3x - targetCenter.x,
+            y: p3y - targetCenter.y
+        };
+    });
 }
 export class Layout {
     constructor(parent, cursor, config) {
@@ -209,7 +256,9 @@ export class Layout {
         }
     }
     remove() {
-        this.parent?.layoutList.splice(this.parent.layoutList.indexOf(this), 1);
+        if (this.parent) {
+            this.parent.layoutList.splice(this.parent.layoutList.indexOf(this), 1);
+        }
     }
 }
 export class BackgroundLayout extends Layout {
@@ -307,7 +356,7 @@ export class ImageLayout extends Layout {
         this.image = image;
         const scaleX = this.rect.width / image.width;
         const scaleY = this.rect.height / image.height;
-        this.scale = Math.min(scaleX, scaleY);
+        // this.scale = Math.min(scaleX, scaleY)
     }
     setRotate(angle) {
         this.angle -= angle;
@@ -406,6 +455,44 @@ export class ImageLayout extends Layout {
             }
         });
     }
+    onEndSelect() {
+        const imageRect = Rect.fromCenter(this.rect.center, this.image.width, this.image.height);
+        console.log("Clip 的位置", this.clipRect.toString());
+        console.log("Image 的位置", imageRect.toString());
+        const center = imageRect.center;
+        const offset = new Point(this.offset.x + center.x, this.offset.y + center.y);
+        console.log("Offset 的相对位置", this.offset);
+        console.log("Offset 的位置", offset);
+        const points = inverseTransform(this.clipRect, {
+            rotation: -this.angle * Math.PI / 180,
+            scaleX: this.scale,
+            scaleY: this.scale,
+            translateX: 0,
+            translateY: 0,
+        }, imageRect.center);
+        console.log(points);
+        let isInside = true;
+        points.forEach(point => {
+            if (!isPointInsideAxisAlignedRect(point, this.image.width, this.image.height)) { // 超出范围
+                isInside = false;
+            }
+        });
+        console.log(isInside);
+    }
+}
+/**
+ * 检查点是否在轴对齐矩形内部
+ */
+function isPointInsideAxisAlignedRect(point, rectWidth, rectHeight, rectCenter = { x: 0, y: 0 }, epsilon = 1e-10) {
+    const halfWidth = rectWidth / 2;
+    const halfHeight = rectHeight / 2;
+    // 相对于矩形中心的坐标
+    const xRelative = point.x - rectCenter.x;
+    const yRelative = point.y - rectCenter.y;
+    return (xRelative >= -halfWidth - epsilon &&
+        xRelative <= halfWidth + epsilon &&
+        yRelative >= -halfHeight - epsilon &&
+        yRelative <= halfHeight + epsilon);
 }
 export class HandleLayout extends Layout {
     constructor(parent, cursor, config) {
@@ -414,6 +501,7 @@ export class HandleLayout extends Layout {
         this.isChecked = false;
         this.mousePoint = new Point(0, 0);
         this.onMoveLayout = null;
+        this.onEndMoveLayout = null;
         this.onEndSelect = null;
         this.center = new CenterLayout(this, centerIcon, 0, handIcon.clone(), config);
         this.topLeft = new PointLayout(this, cornerIcon, -90, resizeIcon.clone(-45), config);
@@ -459,6 +547,9 @@ export class HandleLayout extends Layout {
     }
     setOnMoveLayout(callback) {
         this.onMoveLayout = callback;
+    }
+    setOnEndMoveLayout(callback) {
+        this.onEndMoveLayout = callback;
     }
     setOnEndSelect(callback) {
         this.onEndSelect = callback;
@@ -630,7 +721,7 @@ export class HandleLayout extends Layout {
     }
     end(point) {
         if (this.isChecked) {
-            this.onMoveLayout?.call(this, new Point(point.x - this.mousePoint.x, point.y - this.mousePoint.y));
+            this.onEndMoveLayout?.call(this, new Point(point.x - this.mousePoint.x, point.y - this.mousePoint.y));
             this.mousePoint = point;
             this.isChecked = false;
         }
@@ -718,6 +809,29 @@ export class HandleLayout extends Layout {
         this.drawLine(ctx, new Point(left + width * 2, top), new Point(left + width * 2, bottom));
         super.draw(ctx);
     }
+    endSelect() {
+        if (this.rect.width < minSize || this.rect.height < minSize) {
+            const size = minSize / 2;
+            const center = this.rect.center;
+            const to = new Rect(center.x - size, center.y - size, center.x + size, center.y + size);
+            new LinearAnimation(this.rect, to, 200, () => {
+                this.onEndLayout();
+            }).run();
+            const { left, top, right, bottom } = to;
+            const width = right - left;
+            const height = bottom - top;
+            const diameter = this.config.pointRadius * 2;
+            this.center.endSelect(Rect.fromSize(left + width / 2, top + height / 2, diameter, diameter));
+            this.topLeft.endSelect(Rect.fromSize(left, top, diameter, diameter));
+            this.topCenter.endSelect(Rect.fromSize(left + width / 2, top, diameter, diameter));
+            this.topRight.endSelect(Rect.fromSize(right, top, diameter, diameter));
+            this.centerLeft.endSelect(Rect.fromSize(left, top + height / 2, diameter, diameter));
+            this.centerRight.endSelect(Rect.fromSize(right, top + height / 2, diameter, diameter));
+            this.bottomLeft.endSelect(Rect.fromSize(left, bottom, diameter, diameter));
+            this.bottomCenter.endSelect(Rect.fromSize(left + width / 2, bottom, diameter, diameter));
+            this.bottomRight.endSelect(Rect.fromSize(right, bottom, diameter, diameter));
+        }
+    }
 }
 export class PointLayout extends Layout {
     constructor(parent, icon, angle, cursor, config) {
@@ -767,6 +881,10 @@ export class PointLayout extends Layout {
         this.icon.draw(ctx, this.rect.width, this.rect.height, this.config.borderColor1, this.config.borderColor2, this.config.borderWidth);
         ctx.restore();
     }
+    endSelect(rect) {
+        const to = new Rect(rect.left - this.config.pointRadius, rect.top - this.config.pointRadius, rect.right - this.config.pointRadius, rect.bottom - this.config.pointRadius);
+        new LinearAnimation(this.rect, to, 200).run();
+    }
 }
 export class CenterLayout extends PointLayout {
     draw(ctx) {
@@ -784,11 +902,15 @@ export class MaskLayout extends Layout {
         this.isChecked = false;
         this.mousePoint = new Point(0, 0);
         this.onRotateLayout = null;
+        this.onEndRotateLayout = null;
         this.handle = new HandleLayout(this, moveIcon, config);
         this.layoutList.push(this.handle);
     }
     setOnRotateLayout(callback) {
         this.onRotateLayout = callback;
+    }
+    setOnEndRotateLayout(callback) {
+        this.onEndRotateLayout = callback;
     }
     setOnEndSelect(callback) {
         this.handle.setOnEndSelect(callback);
@@ -837,18 +959,43 @@ export class MaskLayout extends Layout {
             return false;
         }
         this.isChecked = false;
+        this.onEndRotateLayout?.call(this);
         super.end(point);
         return true;
     }
     setHandleRect(rect) {
+        if (rect.left > rect.right) {
+            const temp = rect.left;
+            rect.left = rect.right;
+            rect.right = temp;
+        }
+        if (rect.top > rect.bottom) {
+            const temp = rect.top;
+            rect.top = rect.bottom;
+            rect.bottom = temp;
+        }
         this.handle.setRect(rect);
     }
     endSelect(rect) {
+        if (rect.left > rect.right) {
+            const temp = rect.left;
+            rect.left = rect.right;
+            rect.right = temp;
+        }
+        if (rect.top > rect.bottom) {
+            const temp = rect.top;
+            rect.top = rect.bottom;
+            rect.bottom = temp;
+        }
         this.handle.setRect(rect);
         this.isSelect = false;
+        this.handle.endSelect();
     }
     setOnMoveLayout(callback) {
         this.handle.setOnMoveLayout(callback);
+    }
+    setOnEndMoveLayout(callback) {
+        this.handle.setOnEndMoveLayout(callback);
     }
     draw(ctx) {
         const { left, top, right, bottom } = this.rect;
@@ -1056,11 +1203,19 @@ export class ImageCropper extends Layout {
         this.mask.setOnMoveLayout((offset) => {
             this.image?.moveImage(offset);
         });
+        this.mask.setOnEndMoveLayout((offset) => {
+            this.image?.moveImage(offset);
+            this.image?.onEndSelect();
+        });
         this.mask.setOnRotateLayout((angle) => {
             this.image?.setRotate(angle);
         });
+        this.mask.setOnEndRotateLayout(() => {
+            this.image?.onEndSelect();
+        });
         this.mask.setOnEndSelect((rect) => {
             this.image?.setClipRect(rect.clone());
+            this.image?.onEndSelect();
         });
         this.mask.setRect(this.rect);
         this.mask.setHandleRect(rect);
@@ -1108,7 +1263,7 @@ export class AnimationManager {
     update(time) {
         for (let i = 0; i < this.animations.length; i++) {
             const animation = this.animations[i];
-            if (animation.update(time)) {
+            if (!animation.update(time)) {
                 this.remove(animation);
             }
         }
@@ -1118,22 +1273,34 @@ export class AnimationManager {
 AnimationManager.instance = null;
 export class Animation {
     constructor(form, to, duration, onEnd = null) {
+        this.target = {};
+        this.form = {};
+        this.to = {};
         this.onEnd = null;
-        this.form = form;
+        this.isFinished = false;
+        for (const key in to) {
+            this.form[key] = form[key];
+        }
+        this.target = form;
         this.to = to;
         this.duration = duration;
         this.elapsedTime = 0;
         this.onEnd = onEnd;
     }
     updateValue(progress) {
+        if (this.isFinished) {
+            this.onEnd?.call(this);
+            return false;
+        }
         for (const key in this.to) {
             const from = this.form[key];
             const to = this.to[key];
-            this.form[key] = from + (to - from) * progress;
+            if (from != undefined && to != undefined) {
+                this.target[key] = from + (to - from) * progress;
+            }
         }
         if (progress >= 1) {
-            this.onEnd?.call(this);
-            return false;
+            this.isFinished = true;
         }
         return true;
     }

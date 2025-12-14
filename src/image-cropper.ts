@@ -1,6 +1,6 @@
-import {Point2D, Transform} from "../aa";
 
-const minSize: number = 100
+
+const minSize: number = 20
 
 export enum OutType {
     SIZE,
@@ -652,8 +652,8 @@ export class ImageLayout extends Layout {
                 rotation: -this.angle * Math.PI / 180,
                 scaleX: this.scale,
                 scaleY: this.scale,
-                translateX: -this.offset.x,
-                translateY: -this.offset.y,
+                translateX: 0,
+                translateY: 0,
             },
             imageRect.center
         )
@@ -676,10 +676,10 @@ export class ImageLayout extends Layout {
  * 检查点是否在轴对齐矩形内部
  */
 function isPointInsideAxisAlignedRect(
-    point: Point2D,
+    point: Point,
     rectWidth: number,
     rectHeight: number,
-    rectCenter: Point2D = {x: 0, y: 0},
+    rectCenter: Point = {x: 0, y: 0},
     epsilon: number = 1e-10
 ): boolean {
     const halfWidth = rectWidth / 2;
