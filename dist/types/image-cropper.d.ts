@@ -132,6 +132,11 @@ export declare class ImageLayout extends Layout {
     wheel(delta: Delta): boolean;
     moveImage(offset: Point): void;
     draw(ctx: CanvasRenderingContext2D): void;
+    getOutSize(): {
+        width: number;
+        height: number;
+        scale: number;
+    };
     protected getClipCanvas(): HTMLCanvasElement;
     toBlob(type?: string, quality?: any): Promise<Blob | null>;
     toDataUrl(type?: string, quality?: any): Promise<string>;

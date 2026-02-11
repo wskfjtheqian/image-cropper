@@ -285,12 +285,20 @@ class X extends b {
     const e = new u(this.clipRect.left + this.clipRect.width / 2, this.clipRect.top + this.clipRect.height / 2);
     t.translate(e.x, e.y), t.scale(this.scale, this.scale), t.rotate(this.angle * Math.PI / 180), t.translate(this.offset.x, this.offset.y), t.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
   }
+  getOutSize() {
+    let t = 1;
+    return this.config.outType == 0 && (this.config?.outWidth && this.config?.outHeight ? t = Math.min(this.config?.outWidth / this.clipRect.width, this.config?.outHeight / this.clipRect.height) : this.config?.outWidth ? t = this.config?.outWidth / this.clipRect.width : this.config?.outHeight && (t = this.config?.outHeight / this.clipRect.height)), {
+      width: this.clipRect.width * t,
+      height: this.clipRect.height * t,
+      scale: t
+    };
+  }
   getClipCanvas() {
     const t = document.createElement("canvas"), e = t.getContext("2d");
     if (!e)
       throw new Error("no canvas context");
-    let i = 1;
-    return this.config.outType == 0 && (this.config?.outWidth && this.config?.outHeight ? i = Math.min(this.config?.outWidth / this.clipRect.width, this.config?.outHeight / this.clipRect.height) : this.config?.outWidth ? i = this.config?.outWidth / this.clipRect.width : this.config?.outHeight && (i = this.config?.outHeight / this.clipRect.height)), t.width = this.clipRect.width * i, t.height = this.clipRect.height * i, e.translate(t.width / 2, t.height / 2), e.scale(this.scale * i, this.scale * i), e.rotate(this.angle * Math.PI / 180), e.translate(this.offset.x, this.offset.y), e.drawImage(
+    const { width: i, height: s, scale: o } = this.getOutSize();
+    return t.width = i, t.height = s, e.translate(t.width / 2, t.height / 2), e.scale(this.scale * o, this.scale * o), e.rotate(this.angle * Math.PI / 180), e.translate(this.offset.x, this.offset.y), e.drawImage(
       this.image,
       -this.image.width / 2,
       -this.image.height / 2,
