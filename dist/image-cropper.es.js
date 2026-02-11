@@ -17,10 +17,10 @@ class f {
   draw(t, e, i, s = "#000", o, r = 1) {
     if (!this.path || this.path.length === 0) return;
     t.save(), t.lineJoin = "round", t.lineCap = "round";
-    let n = 0, h = 0, g = this.width, c = this.height;
-    this.viewBox && ([n, h, g, c] = this.viewBox);
-    const m = e / g, d = i / c, w = Math.min(m, d);
-    t.translate(e / 2, i / 2), t.rotate(this.angle * Math.PI / 180), t.scale(w, w), t.translate(-g / 2 - n + 0.5 / w, -c / 2 - h + 0.5 / w);
+    let n = 0, h = 0, d = this.width, c = this.height;
+    this.viewBox && ([n, h, d, c] = this.viewBox);
+    const m = e / d, g = i / c, w = Math.min(m, g);
+    t.translate(e / 2, i / 2), t.rotate(this.angle * Math.PI / 180), t.scale(w, w), t.translate(-d / 2 - n + 0.5 / w, -c / 2 - h + 0.5 / w);
     const L = new Path2D();
     for (const k of this.path)
       L.addPath(new Path2D(k));
@@ -53,12 +53,12 @@ const H = new f(
   24,
   [0, 0, 24, 24],
   ["M20.8,18.3L20.8,18.3l-0.3,0c0,0,0,0,0,0c0-8.2-6.6-14.8-14.8-14.8c0,0-0.1,0-0.1,0V0.2L0.1,5.7l5.5,5.5V7.6c0,0,0.1,0,0.1,0c5.9,0,10.7,4.8,10.7,10.7c0,0,0,0,0,0h-0.3l-0.1,0h-3.1l5.5,5.5l5.5-5.5H20.8z"]
-), I = new f(
+), x = new f(
   24,
   24,
   [0, 0, 24, 24],
   ["M19.3,17.1v-3.3h-5.5v5.5h3.3l-5.2,4.7l-5.1-4.7h3.3v-5.5H4.6v3.3L-0.1,12l4.7-5.2v3.4h5.5V4.7H6.8L12-0.1l5.1,4.7h-3.3v5.5h5.5V6.8L24,12L19.3,17.1z"]
-), x = new f(
+), I = new f(
   24,
   24,
   [0, 0, 24, 24],
@@ -106,14 +106,14 @@ class a {
   }
 }
 function T(l, t, e) {
-  const { scaleX: i, scaleY: s, rotation: o, translateX: r, translateY: n } = t, h = Math.cos(o), g = Math.sin(o), c = l.center;
+  const { scaleX: i, scaleY: s, rotation: o, translateX: r, translateY: n } = t, h = Math.cos(o), d = Math.sin(o), c = l.center;
   return [
     { x: l.left, y: l.top },
     { x: l.right, y: l.top },
     { x: l.left, y: l.bottom },
     { x: l.right, y: l.bottom }
-  ].map((d) => {
-    const w = d.x - r - c.x, L = d.y - n - c.y, k = w * h + L * g, z = -w * g + L * h, E = k / i + c.x, P = z / s + c.y;
+  ].map((g) => {
+    const w = g.x - r - c.x, L = g.y - n - c.y, k = w * h + L * d, z = -w * d + L * h, E = k / i + c.x, P = z / s + c.y;
     return {
       x: E - e.x,
       y: P - e.y
@@ -200,7 +200,7 @@ class v {
 }
 class V extends v {
   constructor(t, e) {
-    super(t, x.clone(), e), this.mousePoint = new u(0, 0), this.selectRect = new a(0, 0, 0, 0), this.onStartSelect = null, this.onMoveSelect = null, this.onEndSelect = null;
+    super(t, I.clone(), e), this.mousePoint = new u(0, 0), this.selectRect = new a(0, 0, 0, 0), this.onStartSelect = null, this.onMoveSelect = null, this.onEndSelect = null;
   }
   setOnStartSelect(t) {
     this.onStartSelect = t;
@@ -228,9 +228,9 @@ class V extends v {
   draw(t) {
     const { left: e, top: i, right: s, bottom: o } = this.rect, r = s - e, n = o - i;
     for (let h = 0; h < n; h += this.config.backgroundBoxSize) {
-      let g = Math.floor(h / this.config.backgroundBoxSize) % 2 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1;
+      let d = Math.floor(h / this.config.backgroundBoxSize) % 2 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1;
       for (let c = 0; c < r; c += this.config.backgroundBoxSize)
-        t.fillStyle = g = g === this.config.backgroundBoxColor1 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1, t.fillRect(c, h, this.config.backgroundBoxSize, this.config.backgroundBoxSize);
+        t.fillStyle = d = d === this.config.backgroundBoxColor1 ? this.config.backgroundBoxColor0 : this.config.backgroundBoxColor1, t.fillRect(c, h, this.config.backgroundBoxSize, this.config.backgroundBoxSize);
     }
   }
 }
@@ -319,11 +319,8 @@ class X extends v {
     }) : Promise.reject(new Error("image not loaded"));
   }
   onEndSelect() {
-    const t = a.fromCenter(this.rect.center, this.image.width, this.image.height);
-    console.log("Clip 的位置", this.clipRect.toString()), console.log("Image 的位置", t.toString());
-    const e = t.center, i = new u(this.offset.x + e.x, this.offset.y + e.y);
-    console.log("Offset 的相对位置", this.offset), console.log("Offset 的位置", i);
-    const s = T(
+    const t = a.fromCenter(this.rect.center, this.image.width, this.image.height), e = t.center;
+    new u(this.offset.x + e.x, this.offset.y + e.y), T(
       this.clipRect,
       {
         rotation: -this.angle * Math.PI / 180,
@@ -333,12 +330,9 @@ class X extends v {
         translateY: 0
       },
       t.center
-    );
-    console.log(s);
-    let o = !0;
-    s.forEach((r) => {
-      Y(r, this.image.width, this.image.height) || (o = !1);
-    }), console.log(o);
+    ).forEach((s) => {
+      Y(s, this.image.width, this.image.height);
+    });
   }
 }
 function Y(l, t, e, i = { x: 0, y: 0 }, s = 1e-10) {
@@ -454,8 +448,8 @@ class F extends v {
     this.center.setRect(a.fromSize(e + r / 2, i + n / 2, h, h)), this.topLeft.setRect(a.fromSize(e, i, h, h)), this.topCenter.setRect(a.fromSize(e + r / 2, i, h, h)), this.topRight.setRect(a.fromSize(s, i, h, h)), this.centerLeft.setRect(a.fromSize(e, i + n / 2, h, h)), this.centerRight.setRect(a.fromSize(s, i + n / 2, h, h)), this.bottomLeft.setRect(a.fromSize(e, o, h, h)), this.bottomCenter.setRect(a.fromSize(e + r / 2, o, h, h)), this.bottomRight.setRect(a.fromSize(s, o, h, h));
   }
   drawEllipse(t, e, i, s, o) {
-    const r = 0.5522848, n = s / 2 * r, h = o / 2 * r, g = e + s, c = i + o, m = e + s / 2, d = i + o / 2;
-    t.moveTo(e, d), t.bezierCurveTo(e, d - h, m - n, i, m, i), t.bezierCurveTo(m + n, i, g, d - h, g, d), t.bezierCurveTo(g, d + h, m + n, c, m, c), t.bezierCurveTo(m - n, c, e, d + h, e, d);
+    const r = 0.5522848, n = s / 2 * r, h = o / 2 * r, d = e + s, c = i + o, m = e + s / 2, g = i + o / 2;
+    t.moveTo(e, g), t.bezierCurveTo(e, g - h, m - n, i, m, i), t.bezierCurveTo(m + n, i, d, g - h, d, g), t.bezierCurveTo(d, g + h, m + n, c, m, c), t.bezierCurveTo(m - n, c, e, g + h, e, g);
   }
   drawMask(t) {
     this.config.circle ? this.drawEllipse(t, this.rect.left, this.rect.top, this.rect.width, this.rect.height) : t.roundRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height, this.config.circleRadius ?? 0);
@@ -474,8 +468,8 @@ class F extends v {
       new C(this.rect, i, 200, () => {
         this.onEndLayout();
       }).run();
-      const { left: s, top: o, right: r, bottom: n } = i, h = r - s, g = n - o, c = this.config.pointRadius * 2;
-      this.center.endSelect(a.fromSize(s + h / 2, o + g / 2, c, c)), this.topLeft.endSelect(a.fromSize(s, o, c, c)), this.topCenter.endSelect(a.fromSize(s + h / 2, o, c, c)), this.topRight.endSelect(a.fromSize(r, o, c, c)), this.centerLeft.endSelect(a.fromSize(s, o + g / 2, c, c)), this.centerRight.endSelect(a.fromSize(r, o + g / 2, c, c)), this.bottomLeft.endSelect(a.fromSize(s, n, c, c)), this.bottomCenter.endSelect(a.fromSize(s + h / 2, n, c, c)), this.bottomRight.endSelect(a.fromSize(r, n, c, c));
+      const { left: s, top: o, right: r, bottom: n } = i, h = r - s, d = n - o, c = this.config.pointRadius * 2;
+      this.center.endSelect(a.fromSize(s + h / 2, o + d / 2, c, c)), this.topLeft.endSelect(a.fromSize(s, o, c, c)), this.topCenter.endSelect(a.fromSize(s + h / 2, o, c, c)), this.topRight.endSelect(a.fromSize(r, o, c, c)), this.centerLeft.endSelect(a.fromSize(s, o + d / 2, c, c)), this.centerRight.endSelect(a.fromSize(r, o + d / 2, c, c)), this.bottomLeft.endSelect(a.fromSize(s, n, c, c)), this.bottomCenter.endSelect(a.fromSize(s + h / 2, n, c, c)), this.bottomRight.endSelect(a.fromSize(r, n, c, c));
     }
   }
 }
@@ -540,7 +534,7 @@ class A extends y {
 }
 class $ extends v {
   constructor(t, e, i) {
-    super(t, e, i), this.maskColor = "#88888888", this.isSelect = !0, this.isChecked = !1, this.mousePoint = new u(0, 0), this.onRotateLayout = null, this.onEndRotateLayout = null, this.handle = new F(this, I, i), this.layoutList.push(this.handle);
+    super(t, e, i), this.maskColor = "#88888888", this.isSelect = !0, this.isChecked = !1, this.mousePoint = new u(0, 0), this.onRotateLayout = null, this.onEndRotateLayout = null, this.handle = new F(this, x, i), this.layoutList.push(this.handle);
   }
   setOnRotateLayout(t) {
     this.onRotateLayout = t;
