@@ -1151,6 +1151,9 @@ export class ImageCropper extends Layout {
             this.overLayout.over();
         }
     }
+    getOutSize() {
+        return this.image?.getOutSize();
+    }
     toDataUrl(type, quality) {
         if (!this.image) {
             return Promise.reject('No image');

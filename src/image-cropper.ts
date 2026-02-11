@@ -1490,6 +1490,10 @@ export class ImageCropper extends Layout implements Root {
         }
     }
 
+    public getOutSize(): { width: number, height: number, scale: number } | undefined {
+        return this.image?.getOutSize()
+    }
+
     public toDataUrl(type?: string, quality?: any): Promise<string> {
         if (!this.image) {
             return Promise.reject('No image')

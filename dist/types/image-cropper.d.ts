@@ -252,6 +252,11 @@ export declare class ImageCropper extends Layout implements Root {
     protected onMouseWheel(event: WheelEvent): void;
     setImage(image: HTMLImageElement): void;
     setOverLayout(layout: Layout): void;
+    getOutSize(): {
+        width: number;
+        height: number;
+        scale: number;
+    } | undefined;
     toDataUrl(type?: string, quality?: any): Promise<string>;
     toBlob(type?: string, quality?: any): Promise<Blob | null>;
     protected initBackground(): void;
