@@ -457,12 +457,12 @@ export class ImageLayout extends Layout {
     }
     onEndSelect() {
         const imageRect = Rect.fromCenter(this.rect.center, this.image.width, this.image.height);
-        console.log("Clip 的位置", this.clipRect.toString());
-        console.log("Image 的位置", imageRect.toString());
+        //console.log("Clip 的位置", this.clipRect.toString())
+        //console.log("Image 的位置", imageRect.toString())
         const center = imageRect.center;
         const offset = new Point(this.offset.x + center.x, this.offset.y + center.y);
-        console.log("Offset 的相对位置", this.offset);
-        console.log("Offset 的位置", offset);
+        //console.log("Offset 的相对位置", this.offset)
+        //console.log("Offset 的位置", offset)
         const points = inverseTransform(this.clipRect, {
             rotation: -this.angle * Math.PI / 180,
             scaleX: this.scale,
@@ -470,14 +470,14 @@ export class ImageLayout extends Layout {
             translateX: 0,
             translateY: 0,
         }, imageRect.center);
-        console.log(points);
+        //console.log(points)
         let isInside = true;
         points.forEach(point => {
             if (!isPointInsideAxisAlignedRect(point, this.image.width, this.image.height)) { // 超出范围
                 isInside = false;
             }
         });
-        console.log(isInside);
+        //console.log(isInside)
     }
 }
 /**
