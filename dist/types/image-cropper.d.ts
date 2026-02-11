@@ -27,8 +27,6 @@ export interface ImageCropperOption {
     guidelineColor1?: string;
     guidelineColor2?: string;
     guidelineDsah?: number;
-    outputWidth?: number;
-    outputHeight?: number;
     maskHandleRadius?: number;
     maskColor?: string;
     backgroundBoxSize?: number;

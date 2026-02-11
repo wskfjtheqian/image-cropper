@@ -136,8 +136,6 @@ export interface ImageCropperOption {
     guidelineColor1?: string;
     guidelineColor2?: string;
     guidelineDsah?: number;
-    outputWidth?: number
-    outputHeight?: number
     maskHandleRadius?: number;
     maskColor?: string;
     backgroundBoxSize?: number
@@ -639,13 +637,13 @@ export class ImageLayout extends Layout {
 
     public onEndSelect(): void {
         const imageRect = Rect.fromCenter(this.rect.center, this.image!.width, this.image!.height)
-        console.log("Clip 的位置", this.clipRect.toString())
-        console.log("Image 的位置", imageRect.toString())
+        //console.log("Clip 的位置", this.clipRect.toString())
+        //console.log("Image 的位置", imageRect.toString())
         const center = imageRect.center
 
         const offset = new Point(this.offset.x + center.x, this.offset.y + center.y)
-        console.log("Offset 的相对位置", this.offset)
-        console.log("Offset 的位置", offset)
+        //console.log("Offset 的相对位置", this.offset)
+        //console.log("Offset 的位置", offset)
         const points = inverseTransform(
             this.clipRect,
             {
@@ -657,7 +655,7 @@ export class ImageLayout extends Layout {
             },
             imageRect.center
         )
-        console.log(points)
+        //console.log(points)
 
         let isInside = true
         points.forEach(point => {
@@ -666,7 +664,7 @@ export class ImageLayout extends Layout {
             }
         })
 
-        console.log(isInside)
+        //console.log(isInside)
 
     }
 }
