@@ -571,14 +571,7 @@ export class ImageLayout extends Layout {
         ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2)
     }
 
-    protected getClipCanvas(): HTMLCanvasElement {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-            throw new Error('no canvas context');
-        }
-
+    public getOutSize(): { width: number, height: number, scale: number } {
         let scale: number = 1
         if (this.config.outType == OutType.SIZE) {
             if (this.config?.outWidth && this.config?.outHeight) {
@@ -589,8 +582,24 @@ export class ImageLayout extends Layout {
                 scale = this.config?.outHeight / this.clipRect.height
             }
         }
-        canvas.width = this.clipRect.width * scale;
-        canvas.height = this.clipRect.height * scale;
+        return {
+            width: this.clipRect.width * scale,
+            height: this.clipRect.height * scale,
+            scale: scale
+        }
+    }
+
+    protected getClipCanvas(): HTMLCanvasElement {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+            throw new Error('no canvas context');
+        }
+
+        const {width, height, scale} = this.getOutSize()
+        canvas.width = width;
+        canvas.height = height;
 
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.scale(this.scale * scale, this.scale * scale);
