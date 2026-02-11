@@ -307,7 +307,7 @@ export class Layout {
     constructor(parent: Layout | null, cursor?: Svg | null, config?: ImageCropperOption) {
         this.parent = parent
         this.cursor = cursor
-        Object.assign(this.config, config)
+        assignExcludingUndefined(this.config, config)
     }
 
     public setRect(rect: Rect): void {
@@ -669,6 +669,22 @@ export class ImageLayout extends Layout {
     }
 }
 
+function assignExcludingUndefined(target: any, ...sources: any[]) {
+    if (target == null) {
+        throw new TypeError('Cannot convert undefined or null to object');
+    }
+    const to = Object(target);
+    sources.forEach(source => {
+        if (source != null) {
+            for (const key in source) {
+                if (source.hasOwnProperty(key) && source[key] !== undefined) {
+                    to[key] = source[key];
+                }
+            }
+        }
+    });
+    return to;
+}
 
 /**
  * 检查点是否在轴对齐矩形内部

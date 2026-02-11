@@ -120,7 +120,7 @@ function T(l, t, e) {
     };
   });
 }
-class v {
+class b {
   constructor(t, e, i) {
     this.layoutList = [], this.rect = new a(0, 0, 0, 0), this.parent = null, this.config = {
       backgroundBoxSize: 10,
@@ -138,7 +138,7 @@ class v {
       cursorStrokeColor: "#ffffff",
       cursorColor: "#000000",
       cursorSize: 18
-    }, this.parent = t, this.cursor = e, Object.assign(this.config, i);
+    }, this.parent = t, this.cursor = e, Y(this.config, i);
   }
   setRect(t) {
     this.rect = t;
@@ -198,7 +198,7 @@ class v {
     this.parent && this.parent.layoutList.splice(this.parent.layoutList.indexOf(this), 1);
   }
 }
-class V extends v {
+class V extends b {
   constructor(t, e) {
     super(t, I.clone(), e), this.mousePoint = new u(0, 0), this.selectRect = new a(0, 0, 0, 0), this.onStartSelect = null, this.onMoveSelect = null, this.onEndSelect = null;
   }
@@ -234,7 +234,7 @@ class V extends v {
     }
   }
 }
-class X extends v {
+class X extends b {
   constructor(t, e) {
     super(t, null, e), this.scale = 1, this.angle = 0, this.clipRect = new a(0, 0, 0, 0), this.offset = new u(0, 0);
   }
@@ -331,17 +331,27 @@ class X extends v {
       },
       t.center
     ).forEach((s) => {
-      Y(s, this.image.width, this.image.height);
+      F(s, this.image.width, this.image.height);
     });
   }
 }
-function Y(l, t, e, i = { x: 0, y: 0 }, s = 1e-10) {
+function Y(l, ...t) {
+  if (l == null)
+    throw new TypeError("Cannot convert undefined or null to object");
+  const e = Object(l);
+  return t.forEach((i) => {
+    if (i != null)
+      for (const s in i)
+        i.hasOwnProperty(s) && i[s] !== void 0 && (e[s] = i[s]);
+  }), e;
+}
+function F(l, t, e, i = { x: 0, y: 0 }, s = 1e-10) {
   const o = t / 2, r = e / 2, n = l.x - i.x, h = l.y - i.y;
   return n >= -o - s && n <= o + s && h >= -r - s && h <= r + s;
 }
-class F extends v {
+class A extends b {
   constructor(t, e, i) {
-    super(t, e, i), this.layoutList = [], this.isChecked = !1, this.mousePoint = new u(0, 0), this.onMoveLayout = null, this.onEndMoveLayout = null, this.onEndSelect = null, this.center = new A(this, H, 0, D.clone(), i), this.topLeft = new y(this, M, -90, p.clone(-45), i), this.topCenter = new y(this, S, 0, p.clone(), i), this.topRight = new y(this, M, 0, p.clone(45), i), this.centerLeft = new y(this, S, -90, p.clone(90), i), this.centerRight = new y(this, S, 90, p.clone(90), i), this.bottomLeft = new y(this, M, 180, p.clone(45), i), this.bottomCenter = new y(this, S, 180, p.clone(), i), this.bottomRight = new y(this, M, 90, p.clone(-45), i), this.center.setOnMoveLayout(this.onMoveCenter.bind(this)), this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this)), this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this)), this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this)), this.centerLeft.setOnMoveLayout(this.onMoveCenterLeft.bind(this)), this.centerRight.setOnMoveLayout(this.onMoveCenterRight.bind(this)), this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this)), this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this)), this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this)), this.center.setOnEndLayout(this.onEndLayout.bind(this)), this.topLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.topCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.topRight.setOnEndLayout(this.onEndLayout.bind(this)), this.centerLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.centerRight.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomRight.setOnEndLayout(this.onEndLayout.bind(this)), this.layoutList = [
+    super(t, e, i), this.layoutList = [], this.isChecked = !1, this.mousePoint = new u(0, 0), this.onMoveLayout = null, this.onEndMoveLayout = null, this.onEndSelect = null, this.center = new j(this, H, 0, D.clone(), i), this.topLeft = new y(this, M, -90, p.clone(-45), i), this.topCenter = new y(this, S, 0, p.clone(), i), this.topRight = new y(this, M, 0, p.clone(45), i), this.centerLeft = new y(this, S, -90, p.clone(90), i), this.centerRight = new y(this, S, 90, p.clone(90), i), this.bottomLeft = new y(this, M, 180, p.clone(45), i), this.bottomCenter = new y(this, S, 180, p.clone(), i), this.bottomRight = new y(this, M, 90, p.clone(-45), i), this.center.setOnMoveLayout(this.onMoveCenter.bind(this)), this.topLeft.setOnMoveLayout(this.onMoveTopLeft.bind(this)), this.topCenter.setOnMoveLayout(this.onMoveTopCenter.bind(this)), this.topRight.setOnMoveLayout(this.onMoveTopRight.bind(this)), this.centerLeft.setOnMoveLayout(this.onMoveCenterLeft.bind(this)), this.centerRight.setOnMoveLayout(this.onMoveCenterRight.bind(this)), this.bottomLeft.setOnMoveLayout(this.onMoveBottomLeft.bind(this)), this.bottomCenter.setOnMoveLayout(this.onMoveBottomCenter.bind(this)), this.bottomRight.setOnMoveLayout(this.onMoveBottomRight.bind(this)), this.center.setOnEndLayout(this.onEndLayout.bind(this)), this.topLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.topCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.topRight.setOnEndLayout(this.onEndLayout.bind(this)), this.centerLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.centerRight.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomLeft.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomCenter.setOnEndLayout(this.onEndLayout.bind(this)), this.bottomRight.setOnEndLayout(this.onEndLayout.bind(this)), this.layoutList = [
       this.topLeft,
       this.topCenter,
       this.topRight,
@@ -473,7 +483,7 @@ class F extends v {
     }
   }
 }
-class y extends v {
+class y extends b {
   constructor(t, e, i, s, o) {
     super(t, s, o), this.isChecked = !1, this.mousePoint = new u(0, 0), this.onMoveLayout = null, this.onEndLayout = null, this.icon = e.clone(), this.icon.setAngle(i);
   }
@@ -520,7 +530,7 @@ class y extends v {
     new C(this.rect, e, 200).run();
   }
 }
-class A extends y {
+class j extends y {
   draw(t) {
     t.save(), t.translate(this.rect.left, this.rect.top), this.icon.draw(
       t,
@@ -532,9 +542,9 @@ class A extends y {
     ), t.restore();
   }
 }
-class $ extends v {
+class $ extends b {
   constructor(t, e, i) {
-    super(t, e, i), this.maskColor = "#88888888", this.isSelect = !0, this.isChecked = !1, this.mousePoint = new u(0, 0), this.onRotateLayout = null, this.onEndRotateLayout = null, this.handle = new F(this, x, i), this.layoutList.push(this.handle);
+    super(t, e, i), this.maskColor = "#88888888", this.isSelect = !0, this.isChecked = !1, this.mousePoint = new u(0, 0), this.onRotateLayout = null, this.onEndRotateLayout = null, this.handle = new A(this, x, i), this.layoutList.push(this.handle);
   }
   setOnRotateLayout(t) {
     this.onRotateLayout = t;
@@ -594,7 +604,7 @@ class $ extends v {
     return this.handle.getRect();
   }
 }
-class U extends v {
+class N extends b {
   constructor(t, e) {
     super(null, null, e), this.overLayout = null, this.layoutList = [], this.mouseOver = !1, this.dirty = !0, this.time = 0, this.background = new V(this, e);
     const { width: i, height: s } = t.getBoundingClientRect();
@@ -718,12 +728,12 @@ class U extends v {
     this.dirty && (this.draw(this.canvas2D), this.dirty = !1), this.dirty = R.getInstance().update(t - this.time), this.time = t, requestAnimationFrame(this.drawLoop.bind(this));
   }
 }
-const b = class b {
+const v = class v {
   constructor() {
     this.animations = [];
   }
   static getInstance() {
-    return b.instance ?? (b.instance = new b());
+    return v.instance ?? (v.instance = new v());
   }
   add(t) {
     this.animations.push(t);
@@ -740,9 +750,9 @@ const b = class b {
     return this.animations.length > 0;
   }
 };
-b.instance = null;
-let R = b;
-class j {
+v.instance = null;
+let R = v;
+class U {
   constructor(t, e, i, s = null) {
     this.target = {}, this.form = {}, this.to = {}, this.onEnd = null, this.isFinished = !1;
     for (const o in e)
@@ -765,7 +775,7 @@ class j {
     R.getInstance().add(this);
   }
 }
-class C extends j {
+class C extends U {
   update(t) {
     this.elapsedTime += t;
     const e = this.duration <= 0 ? 1 : this.elapsedTime / this.duration;
@@ -773,15 +783,15 @@ class C extends j {
   }
 }
 export {
-  j as Animation,
+  U as Animation,
   R as AnimationManager,
   V as BackgroundLayout,
-  A as CenterLayout,
+  j as CenterLayout,
   B as Delta,
-  F as HandleLayout,
-  U as ImageCropper,
+  A as HandleLayout,
+  N as ImageCropper,
   X as ImageLayout,
-  v as Layout,
+  b as Layout,
   C as LinearAnimation,
   $ as MaskLayout,
   O as OutType,
@@ -789,6 +799,6 @@ export {
   y as PointLayout,
   a as Rect,
   f as Svg,
-  U as default,
+  N as default,
   T as inverseTransform
 };
